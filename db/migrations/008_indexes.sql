@@ -1,6 +1,6 @@
 -- Up Migration
 -- Radius search (ST_DWithin) on the generated location column
-CREATE INDEX bios_location_gist ON bios USING GIST (location);
+CREATE INDEX bios_city_idx ON bios (city_id);
 
 -- Shared-sport lookups
 CREATE INDEX user_tags_tag_id_idx ON user_tags (tag_id);
