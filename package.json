@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "db:migrate": "node-pg-migrate up -m db/migrations --envPath .env",
-    "db:down": "node-pg-migrate down 999 -m db/migrations --envPath .env"
+    "db:migrate": "dotenv -e .env -- node-pg-migrate up -m db/migrations",
+    "db:down": "dotenv -e .env -- node-pg-migrate down 999 -m db/migrations"
   },
   "repository": {
     "type": "git",
@@ -18,5 +18,8 @@
   "dependencies": {
     "node-pg-migrate": "^9.0.0",
     "pg": "^8.23.1"
+  },
+  "devDependencies": {
+    "dotenv-cli": "^11.0.0"
   }
 }
