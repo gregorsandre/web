@@ -1,0 +1,22 @@
+{
+  "name": "web",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "db:migrate": "node-pg-migrate up -m db/migrations --envPath .env",
+    "db:down": "node-pg-migrate down 999 -m db/migrations --envPath .env"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://gitea.kood.tech/gregorsandre/web.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "node-pg-migrate": "^9.0.0",
+    "pg": "^8.23.1"
+  }
+}
