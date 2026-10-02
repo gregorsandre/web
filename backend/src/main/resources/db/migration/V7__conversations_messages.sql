@@ -19,6 +19,3 @@ CREATE TABLE messages (
                           read_at         timestamptz                    -- NULL = unread by the recipient
 );
 
--- Down Migration
-DROP TABLE messages;
-DROP TABLE conversations;

@@ -33,6 +33,3 @@ CREATE TABLE bios (
                       CHECK (age_min <= age_max)
 );
 
--- Down Migration
-DROP TABLE bios;
-DROP TABLE profiles;
