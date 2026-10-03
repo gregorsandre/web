@@ -13,6 +13,3 @@ CREATE TABLE user_tags (
                            PRIMARY KEY (user_id, tag_id)
 );
 
--- Down Migration
-DROP TABLE user_tags;
-DROP TABLE tags;

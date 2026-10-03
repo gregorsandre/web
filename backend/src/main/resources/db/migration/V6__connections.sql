@@ -15,5 +15,3 @@ CREATE TABLE connections (
 CREATE UNIQUE INDEX connections_pair_unique
     ON connections (LEAST(requester_id, addressee_id), GREATEST(requester_id, addressee_id));
 
--- Down Migration
-DROP TABLE connections;

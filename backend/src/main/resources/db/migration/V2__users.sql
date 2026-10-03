@@ -6,5 +6,3 @@ CREATE TABLE users (
                        created_at    timestamptz NOT NULL DEFAULT now()
 );
 
--- Down Migration
-DROP TABLE users;

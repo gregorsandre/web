@@ -8,5 +8,3 @@ CREATE TABLE dismissals (
                             CHECK (user_id <> dismissed_user_id)
 );
 
--- Down Migration
-DROP TABLE dismissals;
