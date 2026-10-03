@@ -1,6 +1,5 @@
--- Up Migration
 -- Radius search (ST_DWithin) on the generated location column
-CREATE INDEX bios_city_idx ON bios (city_id);
+CREATE INDEX bios_location_idx ON bios USING GIST (location);
 
 -- Shared-sport lookups
 CREATE INDEX user_tags_tag_id_idx ON user_tags (tag_id);
@@ -16,4 +15,3 @@ CREATE INDEX conversations_user_b_idx ON conversations (user_b, last_message_at 
 -- Paginated history (newest first) and unread counts
 CREATE INDEX messages_conversation_idx ON messages (conversation_id, id DESC);
 CREATE INDEX messages_unread_idx ON messages (conversation_id, sender_id) WHERE read_at IS NULL;
-

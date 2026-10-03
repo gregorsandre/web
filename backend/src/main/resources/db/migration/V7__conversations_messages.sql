@@ -1,4 +1,3 @@
--- Up Migration
 -- Exactly one conversation per pair: user_a is always the smaller uuid.
 CREATE TABLE conversations (
                                id              bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,

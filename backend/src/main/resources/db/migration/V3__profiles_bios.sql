@@ -1,4 +1,3 @@
--- Up Migration
 CREATE TABLE profiles (
                           user_id      uuid PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
                           display_name text NOT NULL DEFAULT '',
@@ -32,7 +31,3 @@ CREATE TABLE bios (
                       updated_at     timestamptz NOT NULL DEFAULT now(),
                       CHECK (age_min <= age_max)
 );
-
--- Down Migration
-DROP TABLE bios;
-DROP TABLE profiles;

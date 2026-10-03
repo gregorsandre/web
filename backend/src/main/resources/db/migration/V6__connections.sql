@@ -1,4 +1,3 @@
--- Up Migration
 -- A pending row = outstanding request (requester -> addressee).
 -- Accept sets status = 'accepted'. Decline or disconnect deletes the row.
 CREATE TABLE connections (

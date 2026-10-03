@@ -1,4 +1,3 @@
--- Up Migration
 -- Sports are tags with category = 'sport'. Other categories could be added later.
 CREATE TABLE tags (
                       id       serial PRIMARY KEY,
