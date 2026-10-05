@@ -1,7 +1,5 @@
 package tech.kood.backend.auth;
 
-import tech.kood.backend.user.User;
-import tech.kood.backend.user.UserRepository;
 import tech.kood.backend.auth.dto.AuthResponse;
 import tech.kood.backend.auth.dto.LoginRequest;
 import tech.kood.backend.auth.dto.RegisterRequest;

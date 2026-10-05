@@ -1,4 +1,4 @@
-package tech.kood.backend.user;
+package tech.kood.backend.auth;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
