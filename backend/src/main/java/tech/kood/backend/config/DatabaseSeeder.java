@@ -1,4 +1,4 @@
-package tech.kood.backend;
+package tech.kood.backend.config;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
