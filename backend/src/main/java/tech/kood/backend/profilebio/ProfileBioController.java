@@ -30,4 +30,10 @@ public class ProfileBioController {
     ResponseEntity<Bio> findBio(@PathVariable("id") UUID id) {
         return service.getBio(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
+
+    @GetMapping("/me")
+
+    @GetMapping("/me/profile")
+
+    @GetMapping("/me/bio")
 }
