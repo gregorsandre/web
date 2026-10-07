@@ -1,9 +1,12 @@
 package tech.kood.backend.profilebio;
 
+import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
+import tech.kood.backend.auth.User;
 
 import java.util.UUID;
 
@@ -17,23 +20,32 @@ public class ProfileBioController {
     }
 
     @GetMapping("/users/{id}")
-    ResponseEntity<ProfileBioService.NameAndPic> findUser(@PathVariable("id") UUID id) {
-        return service.getNameAndPic(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    ResponseEntity<ProfileBioService.NameAndPic> findUser(@PathVariable("id") String id, @AuthenticationPrincipal User me) {
+        return service.getNameAndPic(me.id(), id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/users/{id}/profile")
-    ResponseEntity<String> findProfile(@PathVariable("id") UUID id) {
-        return service.getAbout(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    ResponseEntity<String> findProfile(@PathVariable("id") String id, @AuthenticationPrincipal User me) {
+        return service.getAbout(me.id(), id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/users/{id}/bio")
-    ResponseEntity<Bio> findBio(@PathVariable("id") UUID id) {
-        return service.getBio(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    ResponseEntity<Bio> findBio(@PathVariable("id") String id, @AuthenticationPrincipal User me) {
+        return service.getBio(me.id(), id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/me")
+    ResponseEntity<ProfileBioService.NameAndPic> findMe(@AuthenticationPrincipal User me) {
+        return service.getNameAndPic(me.id(), "me").map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
 
     @GetMapping("/me/profile")
+    ResponseEntity<String> findMyProfile(@AuthenticationPrincipal User me) {
+        return service.getAbout(me.id(), "me").map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
 
     @GetMapping("/me/bio")
+    ResponseEntity<Bio> findMyBio(@AuthenticationPrincipal User me) {
+        return service.getBio(me.id(), "me").map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
 }
