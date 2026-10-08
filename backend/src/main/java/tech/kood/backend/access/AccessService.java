@@ -1,20 +1,19 @@
 package tech.kood.backend.access;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
+import tech.kood.backend.NotFoundException;
+import tech.kood.backend.connection.ConnectionRepository;
 import tech.kood.backend.recommendation.RecommendationService;
 
 import java.util.UUID;
 
 @Service
 public class AccessService {
-    private final JdbcTemplate jdbc;
+    private final ConnectionRepository connectionRepository;
     private final RecommendationService recommendations;
 
-    AccessService(JdbcTemplate jdbc, RecommendationService recommendations) {
-        this.jdbc = jdbc;
+    AccessService(ConnectionRepository connectionRepository, RecommendationService recommendations) {
+        this.connectionRepository = connectionRepository;
         this.recommendations = recommendations;
     }
 
@@ -22,13 +21,7 @@ public class AccessService {
         if (viewerId.equals(targetId)) {
             return true;
         }
-        boolean linked = jdbc.queryForObject("""
-                SELECT EXISTS (
-                    SELECT 1 FROM connections
-                    WHERE (requester_id = ? AND addressee_id = ?)
-                    OR (requester_id = ? AND addressee_id = ?)
-                    )""", Boolean.class, viewerId, targetId, targetId, viewerId);
-        if (Boolean.TRUE.equals(linked)) {
+        if (connectionRepository.findBetween(viewerId, targetId).isPresent()) {
             return true;
         }
         return recommendations.getRecommendationsIds(viewerId).contains(targetId);
@@ -42,11 +35,11 @@ public class AccessService {
             try {
                 targetId = UUID.fromString(rawId);
             } catch (IllegalArgumentException e) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+                throw new NotFoundException("ID not found");
             }
         }
         if (!canView(viewerId, targetId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            throw new NotFoundException("Not allowed to view target");
         }
         return targetId;
     }
