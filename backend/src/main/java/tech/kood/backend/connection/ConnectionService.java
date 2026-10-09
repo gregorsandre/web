@@ -35,14 +35,18 @@ public class ConnectionService {
 
     @Transactional
     public void sendRequest(UUID myId, UUID addresseeId) {
-        UUID target = accessService.requireViewable(myId, );
-        Optional<Connection> existingRequests = repository.findBetween(myId, addresseeId);
-        if (addresseeId.equals(myId)) {
-            throw new NotFoundException("Cannot request yourself");
-        } else if (existingRequests.isPresent()) {
-            throw new NotFoundException("Request or connection already exists");
+        boolean target = accessService.canView(myId, addresseeId);
+        if (target == false) {
+            throw new NotFoundException("Not allowed for " + myId + " to see " + addresseeId);
         } else {
-            repository.newRequest(myId, addresseeId);
+            Optional<Connection> existingRequests = repository.findBetween(myId, addresseeId);
+            if (addresseeId.equals(myId)) {
+                throw new NotFoundException("Cannot request yourself");
+            } else if (existingRequests.isPresent()) {
+                throw new NotFoundException("Request or connection already exists");
+            } else {
+                repository.newRequest(myId, addresseeId);
+            }
         }
     }
 
