@@ -22,13 +22,13 @@ public class BioRepository {
         List<String> availability = arr == null ? List.of() : List.of((String[]) arr.getArray());
         return new Bio(
                 rs.getObject("user_id", UUID.class),
-                rs.getShort("skill_level"),
+                rs.getInt("skill_level"),
                 rs.getString("goal"),
                 rs.getString("looking_for"),
                 rs.getString("env_pref"),
-                rs.getShort("age"),
-                rs.getShort("age_min"),
-                rs.getShort("age_max"),
+                rs.getInt("age"),
+                rs.getInt("age_min"),
+                rs.getInt("age_max"),
                 rs.getDouble("lat"),
                 rs.getDouble("lng"),
                 rs.getInt("max_radius_km"),
@@ -40,5 +40,14 @@ public class BioRepository {
     public Optional<Bio> findById(UUID id) {
         return jdbc.query("SELECT * FROM bios WHERE user_id = ?", MAPPER, id)
                 .stream().findFirst();
+    }
+
+    public boolean isInRange(UUID userA, UUID userB) {
+        return jdbc.queryForObject("""
+                SELECT EXISTS (SELECT 1 FROM bios a, bios b
+                WHERE ST_DWITHIN (a.location, b.location,
+                LEAST (a.max_radius_km, b.max_radius_km) * 1000)
+                AND a.user_id = ? AND b.user_id = ?)
+                """, Boolean.class, userA, userB);
     }
 }
