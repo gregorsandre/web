@@ -1,9 +1,12 @@
-package tech.kood.backend.recommendation;
+package tech.kood.backend.services;
 
 import org.springframework.stereotype.Service;
 import tech.kood.backend.NotFoundException;
-import tech.kood.backend.profilebio.Bio;
-import tech.kood.backend.profilebio.BioRepository;
+import tech.kood.backend.records.Bio;
+import tech.kood.backend.repositories.BioRepository;
+import tech.kood.backend.records.Tag;
+import tech.kood.backend.repositories.TagRepository;
+import tech.kood.backend.records.Recommendation;
 
 import java.util.*;
 

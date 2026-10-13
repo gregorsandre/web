@@ -2,8 +2,8 @@ package tech.kood.backend.access;
 
 import org.springframework.stereotype.Service;
 import tech.kood.backend.NotFoundException;
-import tech.kood.backend.connection.ConnectionRepository;
-import tech.kood.backend.recommendation.RecommendationService;
+import tech.kood.backend.repositories.ConnectionRepository;
+import tech.kood.backend.services.RecommendationService;
 
 import java.util.UUID;
 

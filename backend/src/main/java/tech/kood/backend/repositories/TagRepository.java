@@ -1,17 +1,14 @@
-package tech.kood.backend.recommendation;
+package tech.kood.backend.repositories;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+import tech.kood.backend.records.Tag;
 
-import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.stream.Collector;
-
-import static java.lang.System.in;
 
 @Repository
 public class TagRepository {

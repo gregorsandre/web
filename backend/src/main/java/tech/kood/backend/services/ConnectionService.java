@@ -1,12 +1,12 @@
-package tech.kood.backend.connection;
+package tech.kood.backend.services;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.kood.backend.NotFoundException;
 import tech.kood.backend.access.AccessService;
+import tech.kood.backend.records.Connection;
+import tech.kood.backend.repositories.ConnectionRepository;
 
-import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;

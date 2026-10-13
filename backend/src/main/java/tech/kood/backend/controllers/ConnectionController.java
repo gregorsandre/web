@@ -1,9 +1,10 @@
-package tech.kood.backend.connection;
+package tech.kood.backend.controllers;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import tech.kood.backend.auth.User;
+import tech.kood.backend.services.ConnectionService;
 
 import java.util.List;
 import java.util.UUID;

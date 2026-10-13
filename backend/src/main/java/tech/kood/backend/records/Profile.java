@@ -1,4 +1,4 @@
-package tech.kood.backend.profilebio;
+package tech.kood.backend.records;
 
 import java.time.Instant;
 import java.util.UUID;

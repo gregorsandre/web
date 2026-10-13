@@ -1,4 +1,4 @@
-package tech.kood.backend.recommendation;
+package tech.kood.backend.records;
 
 import java.util.UUID;
 

@@ -1,8 +1,9 @@
-package tech.kood.backend.profilebio;
+package tech.kood.backend.repositories;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+import tech.kood.backend.records.Bio;
 
 import java.sql.Array;
 import java.util.List;

@@ -1,14 +1,14 @@
-package tech.kood.backend.profilebio;
+package tech.kood.backend.controllers;
 
-import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import tech.kood.backend.auth.User;
-
-import java.util.UUID;
+import tech.kood.backend.records.Bio;
+import tech.kood.backend.records.BioWithTags;
+import tech.kood.backend.services.ProfileBioService;
 
 @RestController
 public class ProfileBioController {
@@ -30,8 +30,8 @@ public class ProfileBioController {
     }
 
     @GetMapping("/users/{id}/bio")
-    ResponseEntity<Bio> findBio(@PathVariable("id") String id, @AuthenticationPrincipal User me) {
-        return service.getBio(me.id(), id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    ResponseEntity<BioWithTags> findBioWithTags(@PathVariable("id") String id, @AuthenticationPrincipal User me) {
+        return service.getBioWithTags(me.id(), id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/me")
@@ -46,6 +46,6 @@ public class ProfileBioController {
 
     @GetMapping("/me/bio")
     ResponseEntity<Bio> findMyBio(@AuthenticationPrincipal User me) {
-        return service.getBio(me.id(), "me").map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return service.getMyBio(me.id(), "me").map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 }
