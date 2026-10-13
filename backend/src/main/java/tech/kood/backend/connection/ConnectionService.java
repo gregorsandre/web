@@ -62,5 +62,6 @@ public class ConnectionService {
         if (deletion == 0) {
             throw new NotFoundException("No connection between " + userA + " and " + userB);
         }
+        repository.dismissUser(userA, userB);
     }
 }

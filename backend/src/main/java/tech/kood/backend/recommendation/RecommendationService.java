@@ -4,12 +4,8 @@ import org.springframework.stereotype.Service;
 import tech.kood.backend.NotFoundException;
 import tech.kood.backend.profilebio.Bio;
 import tech.kood.backend.profilebio.BioRepository;
-import tech.kood.backend.profilebio.ProfileRepository;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Service
 public class RecommendationService {
@@ -21,11 +17,29 @@ public class RecommendationService {
         this.tagRep = tagRep;
     }
 
-    public getRecommendationIds(UUID id) {}
+    public List<UUID> getRecommendationIds(UUID id) {
+        Bio me = bioRep.findById(id).orElseThrow(() -> new NotFoundException("Bio not found"));
+        List<Bio> potentialRecommendations = bioRep.findRecommendations(id);
+        List<Recommendation> recommendations = new ArrayList<>();
+        for (Bio user : potentialRecommendations) {
+            int match = scoreMatch(me, user);
+            if (match >= 4) {
+                double distance = haversine(user.lat(), user.lng(), me.lat(), me.lng());
+                Recommendation scoredCandidate = new Recommendation(user.userId(), match, distance);
+                recommendations.add(scoredCandidate);
+            }
+        }
+        recommendations.sort(Comparator.comparingInt(Recommendation::score).reversed()
+                .thenComparingDouble(Recommendation::distance)
+                .thenComparing(Recommendation::userId));
+        List<UUID> bestRecommendations = new ArrayList<>();
+        for (int i = 0; i < 10 && i < recommendations.size(); i++) {
+            bestRecommendations.add(recommendations.get(i).userId());
+        }
+        return bestRecommendations;
+    }
 
-    public int scoreMatch(UUID userA, UUID userB) {
-        Bio a = bioRep.findById(userA).orElseThrow(() -> new NotFoundException("Bio not found"));
-        Bio b = bioRep.findById(userB).orElseThrow(() -> new NotFoundException("Bio not found"));
+    public Integer scoreMatch(Bio a, Bio b) {
         int score = 0;
         boolean ageAInRangeB = b.ageMin() <= a.age() && a.age() <= b.ageMax();
         boolean ageBInRangeA = a.ageMin() <= b.age() && b.age() <= a.ageMax();
@@ -35,14 +49,14 @@ public class RecommendationService {
         if (Math.abs(a.age() - b.age()) <= 5) {
             score += 2;
         }
-        if (!bioRep.isInRange(userA,  userB)) {
+        if (!bioRep.isInRange(a.userId(),  b.userId())) {
             return 0;
         }
         if (!a.lookingFor().equals(b.lookingFor())) {
             return 0;
         }
-        List<Tag> userATags = tagRep.findByUser(userA);
-        List<Tag> userBTags = tagRep.findByUser(userB);
+        List<Tag> userATags = tagRep.findByUser(a.userId());
+        List<Tag> userBTags = tagRep.findByUser(b.userId());
         List<Tag> commonTags = userATags.stream().filter(userBTags::contains).toList();
         if (commonTags.isEmpty()) {
             return 0;
@@ -70,5 +84,24 @@ public class RecommendationService {
             score += 1;
         }
         return score;
+    }
+
+    private Double haversine(double lat1, double lng1, double lat2, double lng2) {
+        // distance between latitudes and longitudes
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lng2 - lng1);
+
+        // convert to radians
+        lat1 = Math.toRadians(lat1);
+        lat2 = Math.toRadians(lat2);
+
+        // apply formulae
+        double a = Math.pow(Math.sin(dLat / 2), 2) +
+                Math.pow(Math.sin(dLon / 2), 2) *
+                        Math.cos(lat1) *
+                        Math.cos(lat2);
+        double rad = 6371;
+        double c = 2 * Math.asin(Math.sqrt(a));
+        return rad * c;
     }
 }

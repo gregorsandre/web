@@ -42,6 +42,14 @@ public class BioRepository {
                 .stream().findFirst();
     }
 
+    public List<Bio> findRecommendations(UUID id) {
+        return jdbc.query("""
+                SELECT * FROM bios WHERE user_id <> ? AND
+                NOT EXISTS (SELECT 1 FROM dismissals
+                WHERE dismissals.user_id = ? AND dismissals.dismissed_user_id = bios.user_id)""",
+                MAPPER, id, id);
+    }
+
     public boolean isInRange(UUID userA, UUID userB) {
         return jdbc.queryForObject("""
                 SELECT EXISTS (SELECT 1 FROM bios a, bios b

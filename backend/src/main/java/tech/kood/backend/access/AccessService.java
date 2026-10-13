@@ -24,7 +24,7 @@ public class AccessService {
         if (connectionRepository.findBetween(viewerId, targetId).isPresent()) {
             return true;
         }
-        return recommendations.getRecommendationsIds(viewerId).contains(targetId);
+        return recommendations.getRecommendationIds(viewerId).contains(targetId);
     }
 
     public UUID requireViewable(UUID viewerId, String rawId) {

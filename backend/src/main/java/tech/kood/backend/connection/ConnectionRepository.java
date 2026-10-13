@@ -76,4 +76,10 @@ public class ConnectionRepository {
             OR (requester_id = ? AND addressee_id = ?)""",
                 userA, userB, userB, userA);
     }
+
+    public void dismissUser(UUID me, UUID dismissed) {
+        jdbc.update("""
+                INSERT INTO dismissals (user_id, dismissed_user_id)
+                VALUES (?, ?)""", me, dismissed);
+    }
 }

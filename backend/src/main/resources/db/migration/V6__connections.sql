@@ -13,4 +13,3 @@ CREATE TABLE connections (
 -- One row per pair, regardless of who asked first (A->B and B->A count as the same pair)
 CREATE UNIQUE INDEX connections_pair_unique
     ON connections (LEAST(requester_id, addressee_id), GREATEST(requester_id, addressee_id));
-
