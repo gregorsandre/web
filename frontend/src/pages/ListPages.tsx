@@ -89,12 +89,3 @@ function mapReady<T, U>(
 ): AsyncState<U> & { reload: () => void } {
   return state.status === 'ready' ? { status: 'ready', data: transform(state.data), reload: state.reload } : state
 }
-
-export function ChatsPage() {
-  return (
-    <section className="page">
-      <h1>Chats</h1>
-      <p>Your conversations will show up here, most recent first.</p>
-    </section>
-  )
-}
