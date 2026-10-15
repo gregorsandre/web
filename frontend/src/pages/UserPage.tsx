@@ -6,6 +6,7 @@ import { Avatar } from '../components/Avatar'
 import { BioDetails } from '../components/BioDetails'
 import { ConnectionActions, type ConnectionOutcome } from '../components/ConnectionActions'
 import { LoadError } from '../components/UserList'
+import { MessageButton } from '../chat/MessageButton'
 import { relationshipWith } from '../connections/relationship'
 import { useAsync } from '../hooks/useAsync'
 
@@ -53,7 +54,10 @@ export function UserPage() {
         <Avatar src={user.avatar} name={user.name} size="large" />
         <h1>{user.name || 'Unnamed'}</h1>
       </header>
-      <ConnectionActions key={user.id} userId={user.id} relationship={relationship} onDone={handleDone} />
+      <div className="profile-actions">
+        {relationship === 'connected' && <MessageButton userId={user.id} />}
+        <ConnectionActions key={user.id} userId={user.id} relationship={relationship} onDone={handleDone} />
+      </div>
       {about && <p className="about">{about}</p>}
       {bio && <BioDetails bio={bio} />}
     </section>

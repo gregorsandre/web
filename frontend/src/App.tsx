@@ -3,7 +3,7 @@ import { AuthProvider } from './auth/AuthProvider'
 import { ChatProvider } from './chat/ChatProvider'
 import { AppShell } from './layout/AppShell'
 import { LoginPage, RegisterPage } from './pages/AuthPages'
-import { ChatsPage } from './pages/ChatPages'
+import { ChatPage, ChatsPage } from './pages/ChatPages'
 import { ConnectionsPage, RecommendationsPage } from './pages/ListPages'
 import { ProfilePage } from './pages/ProfilePage'
 import { NotFoundPage, UserPage } from './pages/UserPage'
@@ -29,6 +29,7 @@ function App() {
                   <Route path="/recommendations" element={<RecommendationsPage />} />
                   <Route path="/connections" element={<ConnectionsPage />} />
                   <Route path="/chats" element={<ChatsPage />} />
+                  <Route path="/chats/:id" element={<ChatPage />} />
                   <Route path="/users/:id" element={<UserPage />} />
                 </Route>
                 <Route path="*" element={<NotFoundPage />} />
