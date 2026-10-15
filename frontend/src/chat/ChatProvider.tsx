@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { getChats, type ChatEvent, type ChatSummary } from '../api/chats'
+import { getChats, type ChatEvent, type ChatSummary, type ClientEvent } from '../api/chats'
 import { getUser } from '../api/users'
 import { getToken } from '../auth/tokenStorage'
 import { useProfileStatus } from '../profile/ProfileStatusContext'
@@ -8,6 +8,8 @@ import { ChatContext, type ChatListener } from './ChatContext'
 
 // Wait before reconnecting: 1 s, 2 s, 5 s, then every 10 s
 const RETRY_DELAYS_MS = [1_000, 2_000, 5_000, 10_000]
+// Must stay well below the server's 60 s idle timeout (ChatSocketHandler.IDLE_TIMEOUT_MS)
+const PING_INTERVAL_MS = 25_000
 
 // One socket per logged-in tab, opened once the profile is complete. Also owns the chat list,
 // so the list, the unread dot and the open chat all update from the same events.
@@ -24,6 +26,10 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const myIdRef = useRef<string | null>(null)
   const activeChatRef = useRef<number | null>(null)
   const listenersRef = useRef(new Set<ChatListener>())
+  const socketRef = useRef<WebSocket | null>(null)
+  // How many mounted components watch each user; the server hears only 0 -> 1 and 1 -> 0
+  const watchCountsRef = useRef(new Map<string, number>())
+  const [presence, setPresence] = useState<ReadonlyMap<string, boolean>>(new Map())
 
   const setChatList = useCallback((next: ChatSummary[] | null) => {
     chatsRef.current = next
@@ -45,6 +51,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
     let socket: WebSocket | null = null
     let retryTimer: number | undefined
+    let pingTimer: number | undefined
     let attempt = 0
     let stopped = false
 
@@ -63,6 +70,9 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         else setChatList(next)
       } else if (event.type === 'read' && current) {
         setChatList(current.map((chat) => (chat.id === event.chatId ? { ...chat, unread: 0 } : chat)))
+      }
+      if (event.type === 'presence') {
+        setPresence((map) => new Map(map).set(event.userId, event.online))
       }
       listenersRef.current.forEach((listener) => listener(event))
     }
@@ -86,11 +96,16 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
       const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws'
       socket = new WebSocket(`${protocol}://${window.location.host}/api/ws?token=${encodeURIComponent(token)}`)
+      socketRef.current = socket
       socket.onopen = () => {
         attempt = 0
+        // Keep-alive: the server closes sockets silent for 60 s, which is how lost connections go offline
+        pingTimer = window.setInterval(() => socket?.send(JSON.stringify({ type: 'ping' })), PING_INTERVAL_MS)
         // Catch up on anything sent between the list load above and the socket opening
         void reloadChats()
         setConnection((n) => n + 1)
+        // The server forgets watches with the old socket; tell the new one again
+        watchCountsRef.current.forEach((_, userId) => socket?.send(JSON.stringify({ type: 'watch', userId })))
       }
       socket.onmessage = (message) => {
         try {
@@ -100,7 +115,11 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         }
       }
       socket.onclose = () => {
+        window.clearInterval(pingTimer)
         socket = null
+        socketRef.current = null
+        // Without a socket the dots would go stale; show nothing until the server answers again
+        setPresence(new Map())
         scheduleRetry()
       }
     }
@@ -112,6 +131,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       stopped = true
       window.clearTimeout(retryTimer)
       socket?.close()
+      socketRef.current = null
+      window.clearInterval(pingTimer)
     }
   }, [enabled, reloadChats, setChatList])
 
@@ -126,6 +147,30 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     activeChatRef.current = chatId
   }, [])
 
+  const send = useCallback((event: ClientEvent) => {
+    const socket = socketRef.current
+    if (socket && socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify(event))
+  }, [])
+
+  const watchPresence = useCallback(
+    (userId: string) => {
+      const counts = watchCountsRef.current
+      const count = (counts.get(userId) ?? 0) + 1
+      counts.set(userId, count)
+      if (count === 1) send({ type: 'watch', userId })
+      return () => {
+        const left = (counts.get(userId) ?? 1) - 1
+        if (left > 0) {
+          counts.set(userId, left)
+          return
+        }
+        counts.delete(userId)
+        send({ type: 'unwatch', userId })
+      }
+    },
+    [send],
+  )
+
   const value = useMemo(
     () => ({
       chats,
@@ -134,8 +179,11 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       hasUnread: chats?.some((chat) => chat.unread > 0) ?? false,
       subscribe,
       setActiveChat,
+      send,
+      watchPresence,
+      presence,
     }),
-    [chats, myId, connection, subscribe, setActiveChat],
+    [chats, myId, connection, subscribe, setActiveChat, send, watchPresence, presence],
   )
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>

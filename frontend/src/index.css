@@ -649,3 +649,49 @@ a {
     bottom: 0;
   }
 }
+
+/* ---------- online status ---------- */
+
+.online-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: normal;
+}
+
+.online-dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+}
+
+.online-status-online .online-dot {
+  background: var(--accent);
+}
+
+/* hollow ring vs filled dot: differs in shape, not only colour, and stays visible on white */
+.online-status-offline .online-dot {
+  box-sizing: border-box;
+  background: transparent;
+  border: 2px solid var(--text-muted);
+}
+
+.chat-head-name {
+  display: grid;
+}
+
+.profile-head-name {
+  flex: 1;
+  min-width: 0;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

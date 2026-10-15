@@ -19,6 +19,15 @@ export type Message = {
 export type ChatEvent =
   | { type: 'message'; chatId: number; message: Message }
   | { type: 'read'; chatId: number }
+  | { type: 'presence'; userId: string; online: boolean }
+  | { type: 'typing'; chatId: number; userId: string }
+
+// What the browser sends over the socket
+export type ClientEvent =
+  | { type: 'watch'; userId: string }
+  | { type: 'unwatch'; userId: string }
+  | { type: 'typing'; chatId: number }
+  | { type: 'ping' }
 
 export const PAGE_SIZE = 30
 

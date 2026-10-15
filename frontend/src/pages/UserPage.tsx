@@ -7,6 +7,7 @@ import { BioDetails } from '../components/BioDetails'
 import { ConnectionActions, type ConnectionOutcome } from '../components/ConnectionActions'
 import { LoadError } from '../components/UserList'
 import { MessageButton } from '../chat/MessageButton'
+import { OnlineStatus } from '../chat/OnlineStatus'
 import { relationshipWith } from '../connections/relationship'
 import { useAsync } from '../hooks/useAsync'
 
@@ -52,7 +53,10 @@ export function UserPage() {
     <section className="page">
       <header className="profile-head">
         <Avatar src={user.avatar} name={user.name} size="large" />
-        <h1>{user.name || 'Unnamed'}</h1>
+        <div className="profile-head-name">
+          <h1>{user.name || 'Unnamed'}</h1>
+          <OnlineStatus userId={user.id} />
+        </div>
       </header>
       <div className="profile-actions">
         {relationship === 'connected' && <MessageButton userId={user.id} />}

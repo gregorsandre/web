@@ -4,6 +4,7 @@ import { getChat, getMessages, markRead, PAGE_SIZE, sendMessage, type Message } 
 import { getUser, nullIfNotFound, type UserSummary } from '../api/users'
 import { useChat } from '../chat/ChatContext'
 import { formatMessageTime } from '../chat/formatTime'
+import { OnlineStatus } from '../chat/OnlineStatus'
 import { Avatar } from '../components/Avatar'
 import { LoadError } from '../components/UserList'
 import { useAsync } from '../hooks/useAsync'
@@ -39,7 +40,9 @@ export function ChatsPage() {
                 <Link to={`/chats/${chat.id}`} className="chat-row">
                   <Avatar src={user?.avatar ?? null} name={name} />
                   <span className="chat-row-body">
-                    <strong>{name}</strong>
+                    <strong>
+                      {name} <OnlineStatus userId={chat.userId} compact />
+                    </strong>
                     <time dateTime={chat.lastMessageAt}>{formatMessageTime(chat.lastMessageAt)}</time>
                   </span>
                   {chat.unread > 0 && (
@@ -190,7 +193,10 @@ function ChatView({ id }: { id: string }) {
       <header className="chat-head">
         <Link to={`/users/${chat.userId}`} className="chat-head-user">
           <Avatar src={user?.avatar ?? null} name={name} />
-          <strong>{name}</strong>
+          <span className="chat-head-name">
+            <strong>{name}</strong>
+            <OnlineStatus userId={chat.userId} />
+          </span>
         </Link>
       </header>
 
