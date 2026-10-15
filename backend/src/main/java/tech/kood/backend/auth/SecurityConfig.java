@@ -32,6 +32,8 @@ public class SecurityConfig {
                         // every 400/401/404/409 reaches the client as an empty 403
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers("/auth/**").permitAll()
+                        // the socket checks its own token during the handshake (TokenHandshakeInterceptor)
+                        .requestMatchers("/ws").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(e -> e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
