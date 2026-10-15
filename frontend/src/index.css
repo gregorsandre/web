@@ -492,3 +492,8 @@ a {
 .user-card-actions {
   padding: 0 0.75rem 0.75rem;
 }
+
+.list-heading {
+  margin: 1.5rem 0 0.75rem;
+  font-size: 1.1rem;
+}
