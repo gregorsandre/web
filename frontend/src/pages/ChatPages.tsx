@@ -9,6 +9,10 @@ import { Avatar } from '../components/Avatar'
 import { LoadError } from '../components/UserList'
 import { useAsync } from '../hooks/useAsync'
 
+// Typing: tell the other person at most every 2 s; show their indicator for 4 s after the last signal
+const TYPING_SEND_INTERVAL_MS = 2_000
+const TYPING_VISIBLE_MS = 4_000
+
 export function ChatsPage() {
   const { chats } = useChat()
   // Keyed on the set of people, not the order, so reordering doesn't refetch names
@@ -69,7 +73,7 @@ export function ChatPage() {
 function ChatView({ id }: { id: string }) {
   const chatId = Number(id)
   const valid = Number.isInteger(chatId) && chatId > 0
-  const { myId, connection, subscribe, setActiveChat } = useChat()
+  const { myId, connection, subscribe, setActiveChat, send } = useChat()
 
   const head = useAsync(`chat:${id}`, async (signal) => {
     if (!valid) return null
@@ -93,6 +97,9 @@ function ChatView({ id }: { id: string }) {
   const [error, setError] = useState<string | null>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const firstConnection = useRef(connection)
+  const [otherTyping, setOtherTyping] = useState(false)
+  const typingTimerRef = useRef<number | undefined>(undefined)
+  const lastTypingSentRef = useRef(0)
 
   // While this page is open: incoming messages appear here and don't count as unread
   useEffect(() => {
@@ -100,12 +107,26 @@ function ChatView({ id }: { id: string }) {
     setActiveChat(chatId)
     markRead(chatId).catch(() => {})
     const unsubscribe = subscribe((event) => {
+      if (event.type === 'typing' && event.chatId === chatId && event.userId !== myId) {
+        setOtherTyping(true)
+        window.clearTimeout(typingTimerRef.current)
+        typingTimerRef.current = window.setTimeout(() => setOtherTyping(false), TYPING_VISIBLE_MS)
+        return
+      }
       if (event.type !== 'message' || event.chatId !== chatId) return
       setLive((list) => [...list, event.message])
-      if (event.message.senderId !== myId) markRead(chatId).catch(() => {})
+      if (event.message.senderId !== myId) {
+        // their message is here, so they've stopped typing
+        window.clearTimeout(typingTimerRef.current)
+        setOtherTyping(false)
+        markRead(chatId).catch(() => {})
+      }
     })
     return () => {
       unsubscribe()
+      window.clearTimeout(typingTimerRef.current)
+      // the effect can re-run (e.g. once myId is known); without this a shown indicator would never expire
+      setOtherTyping(false)
       setActiveChat(null)
     }
   }, [chatId, valid, myId, subscribe, setActiveChat])
@@ -170,12 +191,22 @@ function ChatView({ id }: { id: string }) {
       const message = await sendMessage(chatId, body)
       setLive((list) => [...list, message])
       setDraft('')
+      lastTypingSentRef.current = 0
     } catch {
       setError('Message not sent. Try again.')
     } finally {
       setSending(false)
       // the field stays enabled while sending, so focus is kept; this restores it after a button click
       inputRef.current?.focus()
+    }
+  }
+
+  function handleDraftChange(value: string) {
+    setDraft(value)
+    const now = Date.now()
+    if (value.trim() && now - lastTypingSentRef.current >= TYPING_SEND_INTERVAL_MS) {
+      lastTypingSentRef.current = now
+      send({ type: 'typing', chatId })
     }
   }
 
@@ -218,10 +249,13 @@ function ChatView({ id }: { id: string }) {
       </div>
 
       <form className="composer" onSubmit={handleSend}>
+        <p className="typing-indicator" aria-live="polite">
+          {otherTyping ? `${name} is typing…` : ''}
+        </p>
         <textarea
           ref={inputRef}
           value={draft}
-          onChange={(event) => setDraft(event.target.value)}
+          onChange={(event) => handleDraftChange(event.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Write a message"
           aria-label="Message"

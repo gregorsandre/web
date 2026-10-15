@@ -695,3 +695,13 @@ a {
   clip-path: inset(50%);
   white-space: nowrap;
 }
+
+.typing-indicator {
+  flex-basis: 100%;
+  margin: 0;
+  /* keeps its height while empty, so the messages don't jump */
+  min-height: 1.5em;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-style: italic;
+}
