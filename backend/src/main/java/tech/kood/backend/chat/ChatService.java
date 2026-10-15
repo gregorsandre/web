@@ -65,6 +65,18 @@ public class ChatService {
         sessions.sendTo(me, new ChatEvents.Read(chatId));
     }
 
+    // Forwarded to the other participant only; anything not allowed is silently dropped,
+    // because the sender doesn't wait for an answer
+    public void typing(UUID me, long chatId) {
+        Conversation chat;
+        try {
+            chat = requireAccess(me, chatId);
+        } catch (NotFoundException e) {
+            return;
+        }
+        sessions.sendTo(chat.other(me), new ChatEvents.Typing(chatId, me));
+    }
+
     // 404 both for "no such chat" and "not yours / no longer connected", like the profile endpoints
     private Conversation requireAccess(UUID me, long chatId) {
         Conversation chat = chats.findConversation(chatId)
