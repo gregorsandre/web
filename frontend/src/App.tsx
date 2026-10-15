@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './auth/AuthProvider'
+import { ChatProvider } from './chat/ChatProvider'
 import { AppShell } from './layout/AppShell'
 import { LoginPage, RegisterPage } from './pages/AuthPages'
 import { ChatsPage, ConnectionsPage, RecommendationsPage } from './pages/ListPages'
@@ -39,11 +40,13 @@ function App() {
   )
 }
 
-// Mounted only while logged in, so the profile check restarts for each session
+// Mounted only while logged in, so the profile check and the chat socket restart for each session
 function SignedIn() {
   return (
     <ProfileStatusProvider>
-      <Outlet />
+      <ChatProvider>
+        <Outlet />
+      </ChatProvider>
     </ProfileStatusProvider>
   )
 }

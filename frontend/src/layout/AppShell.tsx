@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
+import { useChat } from '../chat/ChatContext'
 import { useProfileStatus } from '../profile/ProfileStatusContext'
 
 const NAV_ITEMS = [
@@ -12,8 +13,7 @@ const NAV_ITEMS = [
 export function AppShell() {
   const { logout } = useAuth()
   const { status } = useProfileStatus()
-  // TODO: feed this from the chat websocket once chat exists
-  const hasUnreadChats = false
+  const { hasUnread: hasUnreadChats } = useChat()
 
   return (
     <div className="shell">
