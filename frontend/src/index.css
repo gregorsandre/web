@@ -476,3 +476,19 @@ a {
   color: var(--text-muted);
   font-size: 0.9rem;
 }
+
+.user-card-item {
+  display: grid;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.user-card-item .user-card {
+  border: none;
+  background: transparent;
+}
+
+.user-card-actions {
+  padding: 0 0.75rem 0.75rem;
+}

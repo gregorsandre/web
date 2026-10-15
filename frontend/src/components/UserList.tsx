@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import type { UserCardData } from '../data/userCards'
 import type { AsyncState } from '../hooks/useAsync'
@@ -7,9 +8,11 @@ import { BioTags } from './BioDetails'
 type Props = {
   state: AsyncState<UserCardData[]> & { reload: () => void }
   emptyText: string
+  // Buttons can't live inside the card's link, so they get their own row under it
+  renderActions?: (card: UserCardData) => ReactNode
 }
 
-export function UserList({ state, emptyText }: Props) {
+export function UserList({ state, emptyText, renderActions }: Props) {
   if (state.status === 'loading') {
     return <p className="page-status">Loading…</p>
   }
@@ -21,15 +24,16 @@ export function UserList({ state, emptyText }: Props) {
   }
   return (
     <ul className="user-list">
-      {state.data.map(({ user, bio }) => (
-        <li key={user.id}>
-          <Link to={`/users/${user.id}`} className="user-card">
-            <Avatar src={user.avatar} name={user.name} />
+      {state.data.map((card) => (
+        <li key={card.user.id} className={renderActions ? 'user-card-item' : undefined}>
+          <Link to={`/users/${card.user.id}`} className="user-card">
+            <Avatar src={card.user.avatar} name={card.user.name} />
             <span className="user-card-body">
-              <strong>{user.name || 'Unnamed'}</strong>
-              {bio && <BioTags bio={bio} />}
+              <strong>{card.user.name || 'Unnamed'}</strong>
+              {card.bio && <BioTags bio={card.bio} />}
             </span>
           </Link>
+          {renderActions && <div className="user-card-actions">{renderActions(card)}</div>}
         </li>
       ))}
     </ul>
