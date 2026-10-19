@@ -1,4 +1,4 @@
-package tech.kood.backend.user;
+package tech.kood.backend.auth;
 
 import java.time.Instant;
 import java.util.UUID;

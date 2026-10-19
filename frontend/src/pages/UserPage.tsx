@@ -1,22 +1,34 @@
-import { Link, useParams } from 'react-router-dom'
+import { useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import { getConnectionIds, getRequestIds } from '../api/lists'
 import { getAbout, getBio, getUser, nullIfNotFound } from '../api/users'
 import { Avatar } from '../components/Avatar'
 import { BioDetails } from '../components/BioDetails'
+import { ConnectionActions, type ConnectionOutcome } from '../components/ConnectionActions'
 import { LoadError } from '../components/UserList'
+import { MessageButton } from '../chat/MessageButton'
+import { OnlineStatus } from '../chat/OnlineStatus'
+import { relationshipWith } from '../connections/relationship'
 import { useAsync } from '../hooks/useAsync'
 
 export function UserPage() {
   const { id = '' } = useParams()
+  const navigate = useNavigate()
+  // Set after Accept, so the page shows Disconnect without reloading
+  const [acceptedId, setAcceptedId] = useState<string | null>(null)
 
   const state = useAsync(`user:${id}`, async (signal) => {
     // 404 covers both "no such user" and "not allowed to see them"
     const user = await nullIfNotFound(getUser(id, signal))
     if (!user) return null
-    const [about, bio] = await Promise.all([
+    const [about, bio, me, connectionIds, requestIds] = await Promise.all([
       nullIfNotFound(getAbout(id, signal)),
       nullIfNotFound(getBio(id, signal)),
+      getUser('me', signal),
+      getConnectionIds(signal),
+      getRequestIds(signal),
     ])
-    return { user, about, bio }
+    return { user, about, bio, relationship: relationshipWith(user.id, me.id, connectionIds, requestIds) }
   })
 
   if (state.status === 'loading') {
@@ -30,12 +42,26 @@ export function UserPage() {
   }
 
   const { user, about, bio } = state.data
+  const relationship = acceptedId === user.id ? 'connected' : state.data.relationship
+
+  function handleDone(outcome: ConnectionOutcome) {
+    // After Reject or Disconnect the profile is no longer visible to you
+    if (outcome === 'removed') navigate('/connections', { replace: true })
+    else setAcceptedId(user.id)
+  }
   return (
     <section className="page">
       <header className="profile-head">
         <Avatar src={user.avatar} name={user.name} size="large" />
-        <h1>{user.name || 'Unnamed'}</h1>
+        <div className="profile-head-name">
+          <h1>{user.name || 'Unnamed'}</h1>
+          <OnlineStatus userId={user.id} />
+        </div>
       </header>
+      <div className="profile-actions">
+        {relationship === 'connected' && <MessageButton userId={user.id} />}
+        <ConnectionActions key={user.id} userId={user.id} relationship={relationship} onDone={handleDone} />
+      </div>
       {about && <p className="about">{about}</p>}
       {bio && <BioDetails bio={bio} />}
     </section>

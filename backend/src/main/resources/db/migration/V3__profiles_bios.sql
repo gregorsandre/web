@@ -11,13 +11,13 @@ CREATE TABLE profiles (
 -- (sports live in tags/user_tags, see 004)
 CREATE TABLE bios (
                       user_id        uuid PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
-                      skill_level    smallint NOT NULL CHECK (skill_level BETWEEN 1 AND 5),
+                      skill_level    integer NOT NULL CHECK (skill_level BETWEEN 1 AND 3),
                       goal           text NOT NULL CHECK (goal IN ('fun','fitness','competition','event_training')),
                       looking_for    text NOT NULL CHECK (looking_for IN ('regular_partner','casual_games')),
                       env_pref       text NOT NULL CHECK (env_pref IN ('indoor','outdoor','both')),
-                      age            smallint NOT NULL CHECK (age BETWEEN 18 AND 120),
-                      age_min        smallint NOT NULL CHECK (age_min >= 18),
-                      age_max        smallint NOT NULL CHECK (age_max <= 120),
+                      age            integer NOT NULL CHECK (age BETWEEN 18 AND 120),
+                      age_min        integer NOT NULL CHECK (age_min >= 18),
+                      age_max        integer NOT NULL CHECK (age_max <= 120),
                       lat            double precision NOT NULL CHECK (lat BETWEEN -90 AND 90),
                       lng            double precision NOT NULL CHECK (lng BETWEEN -180 AND 180),
                       max_radius_km  integer NOT NULL CHECK (max_radius_km BETWEEN 1 AND 500),

@@ -11,6 +11,11 @@ export async function getConnectionIds(signal?: AbortSignal): Promise<string[]> 
   return toIds(await api<unknown>('/connections', { signal }))
 }
 
+// Incoming requests only: the ids of users who asked to connect with you
+export async function getRequestIds(signal?: AbortSignal): Promise<string[]> {
+  return toIds(await api<unknown>('/connections/requests', { signal }))
+}
+
 // Accepts ["<id>", ...] as well as [{ "id": "<id>" }, ...]
 function toIds(raw: unknown): string[] {
   if (!Array.isArray(raw)) return []

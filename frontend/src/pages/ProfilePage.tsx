@@ -64,7 +64,7 @@ export function ProfilePage() {
         </button>
       </header>
       {about && <p className="about">{about}</p>}
-      <BioDetails bio={bio} />
+      <BioDetails bio={bio} showAgeRange />
     </section>
   )
 }

@@ -456,3 +456,252 @@ a {
   width: auto;
   margin: 0;
 }
+
+/* ---------- connection actions ---------- */
+
+.connection-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.connection-actions .form-error {
+  flex-basis: 100%;
+  font-size: 0.9rem;
+}
+
+.action-note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.user-card-item {
+  display: grid;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.user-card-item .user-card {
+  border: none;
+  background: transparent;
+}
+
+.user-card-actions {
+  padding: 0 0.75rem 0.75rem;
+}
+
+.list-heading {
+  margin: 1.5rem 0 0.75rem;
+  font-size: 1.1rem;
+}
+
+/* ---------- chat list ---------- */
+
+.chat-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.chat-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: inherit;
+  text-decoration: none;
+}
+
+.chat-row-body {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+}
+
+.chat-row-body time {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.unread-badge {
+  min-width: 1.5rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* ---------- chat page ---------- */
+
+.profile-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.chat-page {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100dvh - 2 * var(--nav-height) - 2rem);
+}
+
+.chat-head {
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.chat-head-user {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.messages {
+  flex: 1;
+  display: grid;
+  align-content: start;
+  justify-items: center;
+  gap: 0.5rem;
+  padding: 1rem 0;
+}
+
+.message-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.message {
+  justify-self: start;
+  max-width: min(80%, 32rem);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.message-own {
+  justify-self: end;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+
+.message-body {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.message time {
+  display: block;
+  font-size: 0.75rem;
+  opacity: 0.75;
+}
+
+.composer {
+  position: sticky;
+  /* below 720px the main nav is fixed to the bottom of the screen, so sit on top of it */
+  bottom: var(--nav-height);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.75rem 0;
+  background: var(--bg);
+}
+
+.composer textarea {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  resize: none;
+}
+
+.composer .form-error {
+  flex-basis: 100%;
+}
+
+@media (min-width: 720px) {
+  .composer {
+    bottom: 0;
+  }
+}
+
+/* ---------- online status ---------- */
+
+.online-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: normal;
+}
+
+.online-dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+}
+
+.online-status-online .online-dot {
+  background: var(--accent);
+}
+
+/* hollow ring vs filled dot: differs in shape, not only colour, and stays visible on white */
+.online-status-offline .online-dot {
+  box-sizing: border-box;
+  background: transparent;
+  border: 2px solid var(--text-muted);
+}
+
+.chat-head-name {
+  display: grid;
+}
+
+.profile-head-name {
+  flex: 1;
+  min-width: 0;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.typing-indicator {
+  flex-basis: 100%;
+  margin: 0;
+  /* keeps its height while empty, so the messages don't jump */
+  min-height: 1.5em;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-style: italic;
+}

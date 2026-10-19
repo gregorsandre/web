@@ -7,8 +7,14 @@ import {
   skillLabel,
 } from '../profile/labels'
 
+type Props = {
+  bio: Bio
+  // The age range someone is looking for is private: only shown on your own profile
+  showAgeRange?: boolean
+}
+
 // Coordinates are deliberately not shown anywhere
-export function BioDetails({ bio }: { bio: Bio }) {
+export function BioDetails({ bio, showAgeRange = false }: Props) {
   return (
     <dl className="bio">
       <dt>Age</dt>
@@ -19,7 +25,8 @@ export function BioDetails({ bio }: { bio: Bio }) {
       <dd>{GOAL_LABELS[bio.goal]}</dd>
       <dt>Looking for</dt>
       <dd>
-        {LOOKING_FOR_LABELS[bio.lookingFor]}, aged {bio.ageMin}–{bio.ageMax}
+        {LOOKING_FOR_LABELS[bio.lookingFor]}
+        {showAgeRange && `, aged ${bio.ageMin}–${bio.ageMax}`}
       </dd>
       <dt>Prefers</dt>
       <dd>{ENV_PREF_LABELS[bio.envPref]}</dd>
