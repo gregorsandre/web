@@ -1,5 +1,7 @@
-import { useState, type ReactNode, type SubmitEvent } from 'react'
-import { saveBio, saveProfile } from '../api/profile'
+import { useEffect, useState, type ReactNode, type SubmitEvent } from 'react'
+import { ApiError } from '../api/client'
+import { getAllTags, getMyTags, type Tag } from '../api/tags'
+import { saveProfileSetup } from '../api/profile'
 import {
   AVAILABILITY,
   ENV_PREFS,
@@ -7,6 +9,7 @@ import {
   LOOKING_FOR,
   type Availability,
   type Bio,
+  type BioInput,
 } from '../api/users'
 import {
   AVAILABILITY_LABELS,
@@ -36,6 +39,38 @@ export function ProfileForm({ name, about, bio, onSaved, onCancel }: Props) {
   const [saveError, setSaveError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [locating, setLocating] = useState(false)
+  const [allTags, setAllTags] = useState<Tag[]>([])
+  const [selectedTagIds, setSelectedTagIds] = useState<number[]>([])
+  const [tagsLoaded, setTagsLoaded] = useState(false)
+  const [tagsError, setTagsError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const controller = new AbortController()
+    Promise.all([getAllTags(controller.signal), getMyTags(controller.signal)])
+      .then(([all, mine]) => {
+        setAllTags(all)
+        setSelectedTagIds(mine.map((tag) => tag.id))
+        setTagsLoaded(true)
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) {
+          setTagsError('Could not load the list of sports. Please reload the page.')
+        }
+      })
+    return () => controller.abort()
+  }, [])
+
+  function toggleTag(id: number) {
+    setTagsError(null)
+    setSelectedTagIds((current) =>
+      current.includes(id) ? current.filter((t) => t !== id) : [...current, id],
+    )
+  }
+
+  const tagsByCategory = allTags.reduce<Record<string, Tag[]>>((groups, tag) => {
+    ;(groups[tag.category] ??= []).push(tag)
+    return groups
+  }, {})
 
   function set<K extends keyof ProfileFormValues>(key: K, value: ProfileFormValues[K]) {
     setValues((current) => ({ ...current, [key]: value }))
@@ -62,32 +97,65 @@ export function ProfileForm({ name, about, bio, onSaved, onCancel }: Props) {
         setErrors((e) => ({ ...e, location: undefined }))
         setLocating(false)
       },
-      () => {
-        setErrors((e) => ({ ...e, location: 'Could not get your location. Allow access and try again.' }))
+      (error) => {
+        console.error('Geolocation error', error.code, error.message)
+        const message =
+          error.code === error.PERMISSION_DENIED
+            ? 'Location access is blocked. Allow it in the browser and system settings, then try again.'
+            : error.code === error.TIMEOUT
+              ? 'Finding your location took too long. Try again.'
+              : 'Your device could not work out its location. Check that location services are on.'
+        setErrors((e) => ({ ...e, location: message }))
         setLocating(false)
       },
+      { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 },
     )
   }
 
-  async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setSaveError(null)
-    const result = validateProfile(values)
-    if (!result.ok) {
-      setErrors(result.errors)
-      return
+    async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
+      event.preventDefault()
+      setSaveError(null)
+      const result = validateProfile(values)
+      const noSports = selectedTagIds.length === 0
+      setTagsError(noSports ? 'Choose at least one sport.' : null)
+      if (!result.ok) {
+        setErrors(result.errors)
+        return
+      }
+      if (noSports) return
+      const location = values.location
+      if (!location) return
+      setErrors({})
+      setSaving(true)
+      try {
+        await saveProfileSetup({
+          displayName: values.displayName.trim(),
+          aboutMe: values.aboutMe.trim(),
+          bio: {
+            skillLevel: Number(values.skillLevel),
+            goal: values.goal as BioInput['goal'],
+            lookingFor: values.lookingFor as BioInput['lookingFor'],
+            envPref: values.envPref as BioInput['envPref'],
+            age: Number(values.age),
+            ageMin: Number(values.ageMin),
+            ageMax: Number(values.ageMax),
+            lat: location.lat,
+            lng: location.lng,
+            maxRadiusKm: Number(values.maxRadiusKm),
+            availability: values.availability,
+          },
+          tagIds: selectedTagIds,
+        })
+        onSaved()
+      } catch (err) {
+        setSaveError(
+          err instanceof ApiError && err.status === 400
+            ? err.message
+            : 'Could not save your profile. Please try again.',
+        )
+        setSaving(false)
+      }
     }
-    setErrors({})
-    setSaving(true)
-    try {
-      await saveProfile(result.profile)
-      await saveBio(result.bio)
-      onSaved()
-    } catch {
-      setSaveError('Could not save your profile. Please try again.')
-      setSaving(false)
-    }
-  }
 
   return (
     <form className="form" onSubmit={handleSubmit} noValidate>
@@ -112,6 +180,28 @@ export function ProfileForm({ name, about, bio, onSaved, onCancel }: Props) {
             onChange={(e) => set('aboutMe', e.target.value)}
           />
         </Field>
+
+        <fieldset>
+          <legend>Your sports</legend>
+          {Object.entries(tagsByCategory).map(([category, tags]) => (
+            <div className="field" key={category}>
+              <span>{category}</span>
+              <div className="checks" role="group" aria-label={category}>
+                {tags.map((tag) => (
+                  <label key={tag.id}>
+                    <input
+                      type="checkbox"
+                      checked={selectedTagIds.includes(tag.id)}
+                      onChange={() => toggleTag(tag.id)}
+                    />
+                    {tag.name}
+                  </label>
+                ))}
+              </div>
+            </div>
+          ))}
+          {tagsError && <small className="form-error">{tagsError}</small>}
+        </fieldset>
 
         <Field label="Age" error={errors.age}>
           <input
@@ -244,7 +334,7 @@ export function ProfileForm({ name, about, bio, onSaved, onCancel }: Props) {
       )}
 
       <div className="form-actions">
-        <button type="submit" className="button button-primary" disabled={saving}>
+        <button type="submit" className="button button-primary" disabled={saving || !tagsLoaded}>
           Save profile
         </button>
         {onCancel && (

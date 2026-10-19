@@ -17,19 +17,25 @@ import java.util.UUID;
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
     private final JwtService jwt;
-    public JwtAuthFilter(JwtService jwt) {
+    private final UserRepository users;
+
+    public JwtAuthFilter(JwtService jwt, UserRepository users) {
         this.jwt = jwt;
+        this.users = users;
     }
-    
+
+    @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws ServletException, IOException {
         String header = req.getHeader("Authorization");
         if (header != null && header.startsWith("Bearer ")) {
             try {
                 UUID userId = jwt.parse(header.substring(7));
-                var auth = new UsernamePasswordAuthenticationToken(userId, null, List.of());
-                SecurityContextHolder.getContext().setAuthentication(auth);
+                users.findById(userId).ifPresent(user -> {
+                    var auth = new UsernamePasswordAuthenticationToken(user, null, List.of());
+                    SecurityContextHolder.getContext().setAuthentication(auth);
+                });
             } catch (JwtException | IllegalArgumentException ignored) {
-
+                // invalid or expired token: leave the request unauthenticated, so it gets a 401
             }
         }
         chain.doFilter(req, res);

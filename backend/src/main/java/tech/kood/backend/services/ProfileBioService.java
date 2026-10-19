@@ -2,20 +2,15 @@ package tech.kood.backend.services;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import tech.kood.backend.access.AccessService;
-import tech.kood.backend.records.Bio;
-import tech.kood.backend.records.BioInput;
+import tech.kood.backend.records.*;
 import tech.kood.backend.repositories.BioRepository;
-import tech.kood.backend.records.BioWithTags;
-import tech.kood.backend.records.Profile;
 import tech.kood.backend.repositories.ProfileRepository;
 import tech.kood.backend.repositories.TagRepository;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class ProfileBioService {
@@ -59,12 +54,35 @@ public class ProfileBioService {
         return bioRep.findById(userId).map(bio -> new BioWithTags(bio.userId(), bio.skillLevel(), bio.goal(), bio.lookingFor(), bio.envPref(),
                 bio.age(), bio.availability(), tagRep.findByUser(userId)));
     }
-    public void saveBio(UUID userId, BioInput in) {
-        validate(in);
-        int changed = bioRep.saveBio(userId, in);
-        if (changed != 1) {
+
+    public List<Tag> getAllTags() {
+        return tagRep.findAll();
+    }
+
+    public List<Tag> getMyTags(UUID userId) {
+        return tagRep.findByUser(userId);
+    }
+
+    @Transactional
+    public void saveProfileSetup(UUID userId, ProfileBioInput in) {
+        validateProfileSetup(in);
+        profileRep.saveProfile(userId, in.displayName().trim(), in.aboutMe() == null ? "" : in.aboutMe().trim());
+        if (bioRep.saveBio(userId, in.bio()) != 1) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Bio could not be saved");
         }
+        tagRep.replaceUserTags(userId, in.tagIds());
+        profileRep.markCompleted(userId);
+    }
+
+    private void validateProfileSetup(ProfileBioInput in) {
+        if (in == null) throw bad("Missing profile");
+        String name = in.displayName() == null ? "" : in.displayName().trim();
+        require(!name.isEmpty() && name.length() <= 50, "Name must be 1-50 characters");
+        require(in.aboutMe() == null || in.aboutMe().length() <= 1000, "About me is too long");
+        validate(in.bio());
+        require(in.tagIds() != null && !in.tagIds().isEmpty() && in.tagIds().size() <= 20, "Choose 1-20 sports");
+        require(!in.tagIds().contains(null), "Invalid sport");
+        require(tagRep.tagsExist(in.tagIds()), "Unknown sport selected");
     }
 
     private void validate(BioInput in) {

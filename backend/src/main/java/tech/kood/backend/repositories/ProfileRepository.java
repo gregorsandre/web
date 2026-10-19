@@ -29,4 +29,18 @@ public class ProfileRepository {
         return jdbc.query("SELECT * FROM profiles WHERE user_id = ?", MAPPER, id)
                 .stream().findFirst();
     }
+    public int saveProfile(UUID userId, String displayName, String aboutMe) {
+        return jdbc.update("""
+            INSERT INTO profiles (user_id, display_name, about_me, updated_at)
+            VALUES (?, ?, ?, now())
+            ON CONFLICT (user_id) DO UPDATE SET
+                display_name = EXCLUDED.display_name,
+                about_me     = EXCLUDED.about_me,
+                updated_at   = now()
+            """, userId, displayName, aboutMe);
+    }
+
+    public void markCompleted(UUID userId) {
+        jdbc.update("UPDATE profiles SET completed = true, updated_at = now() WHERE user_id = ?", userId);
+    }
 }

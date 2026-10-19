@@ -5,8 +5,8 @@ const BASE_URL = '/api'
 export class ApiError extends Error {
   readonly status: number
 
-  constructor(status: number) {
-    super(`Request failed with status ${status}`)
+  constructor(status: number, serverMessage?: string) {
+    super(serverMessage || `Request failed with status ${status}`)
     this.name = 'ApiError'
     this.status = status
   }
@@ -52,7 +52,7 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
     if (auth && res.status === 401) {
       onSessionExpired()
     }
-    throw new ApiError(res.status)
+    throw new ApiError(res.status, await readErrorMessage(res))
   }
 
   const text = await res.text()
@@ -62,4 +62,13 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
   // /users/{id}/profile answers with a bare string rather than JSON
   const contentType = res.headers.get('Content-Type') ?? ''
   return (contentType.includes('application/json') ? JSON.parse(text) : text) as T
+}
+
+async function readErrorMessage(res: Response): Promise<string | undefined> {
+  try {
+    const data = await res.json()
+    return typeof data?.message === 'string' ? data.message : undefined
+  } catch {
+    return undefined
+  }
 }

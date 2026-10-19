@@ -1,18 +1,13 @@
 import { api } from './client'
 import type { BioInput } from './users'
 
-// NOTE: the backend has no write endpoints for the profile yet. These two are
-// the contract this form assumes; adjust here once the real ones exist.
-
-export type ProfileInput = {
+export type ProfileSetupInput = {
   displayName: string
   aboutMe: string
+  bio: BioInput
+  tagIds: number[]
 }
 
-export function saveProfile(input: ProfileInput): Promise<void> {
-  return api<void>('/me/profile', { method: 'PUT', body: input })
-}
-
-export function saveBio(input: BioInput): Promise<void> {
-  return api<void>('/me/bio', { method: 'PUT', body: input })
+export function saveProfileSetup(input: ProfileSetupInput): Promise<void> {
+  return api<void>('/me/setup', { method: 'PUT', body: input })
 }

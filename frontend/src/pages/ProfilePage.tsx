@@ -6,6 +6,7 @@ import { LoadError } from '../components/UserList'
 import { useAsync } from '../hooks/useAsync'
 import { useProfileStatus } from '../profile/ProfileStatusContext'
 import { ProfileForm } from './ProfileForm'
+import { getMyTags } from '../api/tags'
 
 export function ProfilePage() {
   const profileStatus = useProfileStatus()
@@ -13,12 +14,13 @@ export function ProfilePage() {
 
   const state = useAsync('me', async (signal) => {
     // Each part may be missing for a brand-new account
-    const [user, about, bio] = await Promise.all([
+    const [user, about, bio, tags] = await Promise.all([
       nullIfNotFound(getUser('me', signal)),
       nullIfNotFound(getAbout('me', signal)),
       nullIfNotFound(getBio('me', signal)),
+      getMyTags(signal),
     ])
-    return { user, about: about ?? '', bio }
+    return { user, about: about ?? '', bio, tags }
   })
 
   if (state.status === 'loading') {
@@ -28,7 +30,7 @@ export function ProfilePage() {
     return <LoadError onRetry={state.reload} />
   }
 
-  const { user, about, bio } = state.data
+  const { user, about, bio, tags } = state.data
   const name = user?.name ?? ''
 
   function handleSaved() {
@@ -47,6 +49,7 @@ export function ProfilePage() {
           name={name}
           about={about}
           bio={bio}
+          tags={tags}
           onSaved={handleSaved}
           onCancel={bio ? () => setEditing(false) : undefined}
         />
@@ -65,6 +68,11 @@ export function ProfilePage() {
       </header>
       {about && <p className="about">{about}</p>}
       <BioDetails bio={bio} showAgeRange />
+      {tags.length > 0 && (
+        <p>
+          <strong>Sports:</strong> {tags.map((tag) => tag.name).join(', ')}
+        </p>
+      )}
     </section>
   )
 }
