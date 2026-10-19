@@ -1,15 +1,20 @@
 package tech.kood.backend.services;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import tech.kood.backend.access.AccessService;
 import tech.kood.backend.records.Bio;
+import tech.kood.backend.records.BioInput;
 import tech.kood.backend.repositories.BioRepository;
 import tech.kood.backend.records.BioWithTags;
 import tech.kood.backend.records.Profile;
 import tech.kood.backend.repositories.ProfileRepository;
 import tech.kood.backend.repositories.TagRepository;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -19,6 +24,11 @@ public class ProfileBioService {
     private final BioRepository bioRep;
     private final TagRepository tagRep;
     private final AccessService accessService;
+
+    private static final Set<String> GOAL = Set.of("fun", "fitness","competition","event_training");
+    private static final Set<String> LOOKING_FOR = Set.of("regular_partner", "casual_games");
+    private static final Set<String> ENV_PREF = Set.of("indoor","outdoor","both");
+    private static final Set<String> AVAILABILITY = Set.of("weekday_morning","weekday_evening","weekend");
 
     public ProfileBioService(ProfileRepository profileRep, BioRepository bioRep, TagRepository tagRep, AccessService accessService) {
         this.profileRep = profileRep;
@@ -47,6 +57,44 @@ public class ProfileBioService {
     public Optional<BioWithTags> getBioWithTags(UUID viewerId, String rawId) {
         UUID userId = accessService.requireViewable(viewerId, rawId);
         return bioRep.findById(userId).map(bio -> new BioWithTags(bio.userId(), bio.skillLevel(), bio.goal(), bio.lookingFor(), bio.envPref(),
-                bio.age(), bio.availability(), tagRep.findByUser(viewerId)));
+                bio.age(), bio.availability(), tagRep.findByUser(userId)));
+    }
+    public void saveBio(UUID userId, BioInput in) {
+        validate(in);
+        int changed = bioRep.saveBio(userId, in);
+        if (changed != 1) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Bio could not be saved");
+        }
+    }
+
+    private void validate(BioInput in) {
+        if (in == null) throw bad("Missing bio");
+
+        require(in.skillLevel() != null && in.skillLevel() >= 1 && in.skillLevel() <= 5, "Skill level must be 1-5");
+        require(in.goal() != null && GOAL.contains(in.goal()), "Invalid goal");
+        require(in.lookingFor() != null && LOOKING_FOR.contains(in.lookingFor()), "Invalid looking-for value");
+        require(in.envPref() != null && ENV_PREF.contains(in.envPref()), "Invalid environment preference");
+
+        require(in.age() != null && in.age() >= 18 && in.age() <= 120, "Age must be 18-120");
+        require(in.ageMin() != null && in.ageMax() != null, "Preferred age range is required");
+        require(in.ageMin() >= 18 && in.ageMax() <= 120, "Preferred age range must be within 18-120");
+        require(in.ageMin() <= in.ageMax(), "Minimum age cannot be higher than maximum age");
+
+        require(in.lat() != null && !in.lat().isNaN() && in.lat() >= -90 && in.lat() <= 90, "Invalid latitude");
+        require(in.lng() != null && !in.lng().isNaN() && in.lng() >= -180 && in.lng() <= 180, "Invalid longitude");
+        require(in.maxRadiusKm() != null && in.maxRadiusKm() >= 1 && in.maxRadiusKm() <= 500, "Radius must be 1-500 km");
+
+        require(in.availability() != null && !in.availability().isEmpty(), "Choose at least one availability");
+        Set<String> unique = new HashSet<>(in.availability());
+        require(unique.size() == in.availability().size(), "Duplicate availability values");
+        require(AVAILABILITY.containsAll(unique), "Invalid availability value");
+    }
+
+    private void require(boolean condition, String message) {
+        if (!condition) throw bad(message);
+    }
+
+    private ResponseStatusException bad(String message) {
+        return new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
     }
 }
