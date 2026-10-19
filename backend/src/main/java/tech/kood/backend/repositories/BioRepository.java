@@ -4,6 +4,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import tech.kood.backend.records.Bio;
+import tech.kood.backend.records.BioInput;
 
 import java.sql.Array;
 import java.util.List;
@@ -58,5 +59,41 @@ public class BioRepository {
                 LEAST (a.max_radius_km, b.max_radius_km) * 1000)
                 AND a.user_id = ? AND b.user_id = ?)
                 """, Boolean.class, userA, userB);
+    }
+
+    public int saveBio(UUID userId, BioInput bioInput) {
+        String sql = """
+            INSERT INTO bios (user_id, skill_level, goal, looking_for, env_pref, age, age_min, age_max,
+                              lat, lng, max_radius_km, availability, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now())
+            ON CONFLICT (user_id) DO UPDATE SET
+                skill_level   = EXCLUDED.skill_level,
+                goal          = EXCLUDED.goal,
+                looking_for   = EXCLUDED.looking_for,
+                env_pref      = EXCLUDED.env_pref,
+                age           = EXCLUDED.age,
+                age_min       = EXCLUDED.age_min,
+                age_max       = EXCLUDED.age_max,
+                lat           = EXCLUDED.lat,
+                lng           = EXCLUDED.lng,
+                max_radius_km = EXCLUDED.max_radius_km,
+                availability  = EXCLUDED.availability,
+                updated_at    = now()
+            """;
+
+        return jdbc.update(sql, ps -> {
+            ps.setObject(1, userId);
+            ps.setInt(2, bioInput.skillLevel());
+            ps.setString(3, bioInput.goal());
+            ps.setString(4, bioInput.lookingFor());
+            ps.setString(5, bioInput.envPref());
+            ps.setInt(6, bioInput.age());
+            ps.setInt(7, bioInput.ageMin());
+            ps.setInt(8, bioInput.ageMax());
+            ps.setDouble(9, bioInput.lat());
+            ps.setDouble(10, bioInput.lng());
+            ps.setInt(11, bioInput.maxRadiusKm());
+            ps.setArray(12, ps.getConnection().createArrayOf("text", bioInput.availability().toArray(new String[0])));
+        });
     }
 }
