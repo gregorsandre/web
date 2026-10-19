@@ -14,3 +14,10 @@ to wipe the database completely:
 ```
 docker compose down -v
 ```
+
+starting up the frontend (needs the backend running on port 8080):
+```
+cd frontend
+npm install
+npm run dev        # http://localhost:5173, API calls are proxied to the backend under /api
+```
