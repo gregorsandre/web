@@ -12,3 +12,18 @@ CREATE TABLE user_tags (
                            PRIMARY KEY (user_id, tag_id)
 );
 
+INSERT INTO tags (category, name) VALUES
+                                      ('sport', 'running'),
+                                      ('sport', 'tennis'),
+                                      ('sport', 'football'),
+                                      ('sport', 'basketball'),
+                                      ('sport', 'cycling'),
+                                      ('sport', 'swimming'),
+                                      ('sport', 'climbing'),
+                                      ('sport', 'yoga'),
+                                      ('sport', 'badminton'),
+                                      ('sport', 'volleyball'),
+                                      ('sport', 'hiking'),
+                                      ('sport', 'padel'),
+                                      ('sport', 'table tennis'),
+                                      ('sport', 'gym');

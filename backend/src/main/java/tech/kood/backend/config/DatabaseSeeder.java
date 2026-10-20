@@ -16,8 +16,6 @@ import java.util.UUID;
 @Profile("seed")
 public class DatabaseSeeder implements CommandLineRunner {
 
-    private static final String[] SPORTS = {"running","tennis","football","basketball","cycling","swimming",
-            "climbing","yoga","badminton","volleyball","hiking","padel","table tennis","gym"};
     private static final String[] GOAL = {"fun", "fitness","competition","event_training"};
     private static final String[] LOOKING_FOR = {"regular_partner", "casual_games"};
     private static final String[] ENV = {"indoor","outdoor","both"};
@@ -40,10 +38,10 @@ public class DatabaseSeeder implements CommandLineRunner {
     public void run(String... args) {
         int count = Integer.getInteger("seed.count", 120);
         Random rnd = new Random(42);
-        for (String s : SPORTS)
-            jdbc.update("INSERT INTO tags(name, category) VALUES (?, 'sport') ON CONFLICT DO NOTHING", s);
         List<Integer> tagIds = jdbc.queryForList("SELECT id FROM tags WHERE category='sport'", Integer.class);
-
+        if (tagIds.isEmpty()) {
+            throw new IllegalStateException("No sports in the tags table. Run the migrations first (reset profile).");
+        }
         String hash = new BCryptPasswordEncoder().encode("password123");
         for (int i = 1; i <= count; i++) {
             UUID id = UUID.randomUUID();
