@@ -3,6 +3,7 @@ package tech.kood.backend.controllers;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import tech.kood.backend.auth.User;
 import tech.kood.backend.services.ConnectionService;
 
 import java.util.List;
@@ -17,30 +18,30 @@ public class ConnectionController {
     }
 
     @GetMapping("/connections") //list?
-    List<UUID> connections(@AuthenticationPrincipal UUID me) {
-        return service.getConnections(me);
+    List<UUID> connections(@AuthenticationPrincipal User me) {
+        return service.getConnections(me.id());
     }
 
     @GetMapping("/connections/requests") //list?
-    List<UUID> requests(@AuthenticationPrincipal UUID me) {
-        return service.getRequests(me);
+    List<UUID> requests(@AuthenticationPrincipal User me) {
+        return service.getRequests(me.id());
     }
 
     @PostMapping("/connections/{id}") //send a request
     @ResponseStatus(HttpStatus.CREATED)
-    void sendRequest(@AuthenticationPrincipal UUID me, @PathVariable("id") UUID id) {
-        service.sendRequest(me, id);
+    void sendRequest(@AuthenticationPrincipal User me, @PathVariable("id") UUID id) {
+        service.sendRequest(me.id(), id);
     }
 
     @PutMapping("/connections/{id}") //accept a request
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void acceptRequest(@PathVariable("id") UUID id, @AuthenticationPrincipal UUID me) {
-        service.acceptRequest(id, me);
+    void acceptRequest(@PathVariable("id") UUID id, @AuthenticationPrincipal User me) {
+        service.acceptRequest(id, me.id());
     }
 
     @DeleteMapping("/connections/{id}") // disconnect
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void delete(@PathVariable("id") UUID id, @AuthenticationPrincipal UUID me) {
-        service.deleteConnection(id, me);
+    void delete(@PathVariable("id") UUID id, @AuthenticationPrincipal User me) {
+        service.deleteConnection(id, me.id());
     }
 }
