@@ -1,4 +1,5 @@
 import type { Bio } from '../api/users'
+import type { Tag } from '../api/tags'
 import {
   AVAILABILITY_LABELS,
   ENV_PREF_LABELS,
@@ -7,15 +8,21 @@ import {
   skillLabel,
 } from '../profile/labels'
 
+export type BioFields = Pick<
+  Bio, 'age' | 'skillLevel' | 'goal' | 'lookingFor' | 'envPref' | 'availability'> &
+  Partial<Pick<Bio, 'ageMin' | 'ageMax'>>
+
 type Props = {
-  bio: Bio
+  bio: BioFields
+  tags?: Tag[]
   // The age range someone is looking for is private: only shown on your own profile
   showAgeRange?: boolean
 }
 
 // Coordinates are deliberately not shown anywhere
-export function BioDetails({ bio, showAgeRange = false }: Props) {
-  return (
+export function BioDetails({ bio, tags, showAgeRange = false }: Props) {
+  const hasAgeRange = bio.ageMin !== undefined && bio.ageMax !== undefined
+return (
     <dl className="bio">
       <dt>Age</dt>
       <dd>{bio.age}</dd>
@@ -26,17 +33,23 @@ export function BioDetails({ bio, showAgeRange = false }: Props) {
       <dt>Looking for</dt>
       <dd>
         {LOOKING_FOR_LABELS[bio.lookingFor]}
-        {showAgeRange && `, aged ${bio.ageMin}–${bio.ageMax}`}
+        {showAgeRange && hasAgeRange && `, aged ${bio.ageMin}–${bio.ageMax}`}
       </dd>
       <dt>Prefers</dt>
       <dd>{ENV_PREF_LABELS[bio.envPref]}</dd>
       <dt>Available</dt>
       <dd>{bio.availability.map((slot) => AVAILABILITY_LABELS[slot]).join(', ')}</dd>
+      {tags && tags.length > 0 && (
+              <>
+                <dt>Sports</dt>
+                <dd>{tags.map((tag) => tag.name).join(', ')}</dd>
+              </>
+      )}
     </dl>
   )
 }
 
-export function BioTags({ bio }: { bio: Bio }) {
+export function BioTags({ bio }: { bio: BioFields }) {
   return (
     <ul className="tags">
       <li>{bio.age} y</li>

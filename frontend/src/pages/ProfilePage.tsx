@@ -67,12 +67,7 @@ export function ProfilePage() {
         </button>
       </header>
       {about && <p className="about">{about}</p>}
-      <BioDetails bio={bio} showAgeRange />
-      {tags.length > 0 && (
-        <p>
-          <strong>Sports:</strong> {tags.map((tag) => tag.name).join(', ')}
-        </p>
-      )}
+      <BioDetails bio={bio} showAgeRange tags={tags} />
     </section>
   )
 }

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { getConnectionIds, getRequestIds } from '../api/lists'
-import { getAbout, getBio, getUser, nullIfNotFound } from '../api/users'
+import { getAbout, getBioWithTags, getUser, nullIfNotFound } from '../api/users'
 import { Avatar } from '../components/Avatar'
 import { BioDetails } from '../components/BioDetails'
 import { ConnectionActions, type ConnectionOutcome } from '../components/ConnectionActions'
@@ -23,7 +23,7 @@ export function UserPage() {
     if (!user) return null
     const [about, bio, me, connectionIds, requestIds] = await Promise.all([
       nullIfNotFound(getAbout(id, signal)),
-      nullIfNotFound(getBio(id, signal)),
+      nullIfNotFound(getBioWithTags(id, signal)),
       getUser('me', signal),
       getConnectionIds(signal),
       getRequestIds(signal),
@@ -63,7 +63,7 @@ export function UserPage() {
         <ConnectionActions key={user.id} userId={user.id} relationship={relationship} onDone={handleDone} />
       </div>
       {about && <p className="about">{about}</p>}
-      {bio && <BioDetails bio={bio} />}
+      {bio && <BioDetails bio={bio} tags={bio.tags} />}
     </section>
   )
 }

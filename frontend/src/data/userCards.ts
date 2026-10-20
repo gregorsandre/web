@@ -1,8 +1,8 @@
-import { getBio, getUser, nullIfNotFound, type Bio, type UserSummary } from '../api/users'
+import { getBioWithTags, getUser, nullIfNotFound, type BioWithTags, type UserSummary } from '../api/users'
 
 export type UserCardData = {
   user: UserSummary
-  bio: Bio | null
+  bio: BioWithTags | null
 }
 
 // The API only hands out ids for lists, so each card is assembled from
@@ -13,7 +13,7 @@ export async function loadUserCards(ids: string[], signal?: AbortSignal): Promis
     ids.map(async (id) => {
       const [user, bio] = await Promise.all([
         nullIfNotFound(getUser(id, signal)),
-        nullIfNotFound(getBio(id, signal)),
+        nullIfNotFound(getBioWithTags(id, signal)),
       ])
       return user ? { user, bio } : null
     }),

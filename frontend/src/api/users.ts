@@ -1,4 +1,5 @@
 import { api, ApiError } from './client'
+import type { Tag } from './tags'
 
 // Shapes follow the backend records in tech.kood.backend.profilebio
 
@@ -37,6 +38,17 @@ export type Bio = BioInput & {
   updatedAt: string
 }
 
+export type BioWithTags = {
+    userId: string
+    skillLevel: number
+    goal: Goal
+    lookingFor: LookingFor
+    envPref: EnvPref
+    age: number
+    availability: Availability[]
+    tags: Tag[]
+    }
+
 // `id` is a user id or "me"
 export function getUser(id: string, signal?: AbortSignal): Promise<UserSummary> {
   return api<UserSummary>(userPath(id), { signal })
@@ -52,6 +64,10 @@ export async function getAbout(id: string, signal?: AbortSignal): Promise<string
 
 export function getBio(id: string, signal?: AbortSignal): Promise<Bio> {
   return api<Bio>(`${userPath(id)}/bio`, { signal })
+}
+
+export function getBioWithTags(id: string, signal?: AbortSignal): Promise<BioWithTags> {
+    return api<BioWithTags>(`${userPath(id)}/bio`, { signal })
 }
 
 // Turns "this user has no such thing" into null and lets real failures through
