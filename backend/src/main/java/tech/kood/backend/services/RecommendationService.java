@@ -44,26 +44,12 @@ public class RecommendationService {
 
     public Integer scoreMatch(Bio a, Bio b) {
         int score = 0;
-        boolean ageAInRangeB = b.ageMin() <= a.age() && a.age() <= b.ageMax();
-        boolean ageBInRangeA = a.ageMin() <= b.age() && b.age() <= a.ageMax();
-        if (!ageAInRangeB || !ageBInRangeA) {
-            return 0;
-        }
         if (Math.abs(a.age() - b.age()) <= 5) {
             score += 2;
-        }
-        if (!bioRep.isInRange(a.userId(),  b.userId())) {
-            return 0;
-        }
-        if (!a.lookingFor().equals(b.lookingFor())) {
-            return 0;
         }
         List<Tag> userATags = tagRep.findByUser(a.userId());
         List<Tag> userBTags = tagRep.findByUser(b.userId());
         List<Tag> commonTags = userATags.stream().filter(userBTags::contains).toList();
-        if (commonTags.isEmpty()) {
-            return 0;
-        }
         if (commonTags.size() >= 2) {
             score += 2;
         }

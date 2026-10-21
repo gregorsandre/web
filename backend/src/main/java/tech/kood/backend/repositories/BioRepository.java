@@ -46,19 +46,29 @@ public class BioRepository {
 
     public List<Bio> findRecommendations(UUID id) {
         return jdbc.query("""
-                SELECT * FROM bios WHERE user_id <> ? AND
-                NOT EXISTS (SELECT 1 FROM dismissals
-                WHERE dismissals.user_id = ? AND dismissals.dismissed_user_id = bios.user_id)""",
-                MAPPER, id, id);
-    }
-
-    public boolean isInRange(UUID userA, UUID userB) {
-        return jdbc.queryForObject("""
-                SELECT EXISTS (SELECT 1 FROM bios a, bios b
-                WHERE ST_DWITHIN (a.location, b.location,
-                LEAST (a.max_radius_km, b.max_radius_km) * 1000)
-                AND a.user_id = ? AND b.user_id = ?)
-                """, Boolean.class, userA, userB);
+                        SELECT candidate.* FROM bios candidate
+                        JOIN profiles cp ON candidate.user_id = cp.user_id
+                        JOIN bios me ON me.user_id = ?
+                        JOIN profiles mp ON mp.user_id = me.user_id
+                        WHERE cp.user_id <> me.user_id
+                        AND cp.completed = true
+                        AND mp.completed = true
+                        AND candidate.age BETWEEN me.age_min AND me.age_max
+                        AND me.age BETWEEN candidate.age_min AND candidate.age_max
+                        AND me.looking_for = candidate.looking_for
+                        AND ST_DWITHIN (candidate.location, me.location,
+                                        LEAST (candidate.max_radius_km, me.max_radius_km) * 1000)
+                        AND EXISTS (SELECT 1 FROM user_tags ct
+                        	JOIN user_tags mt ON ct.tag_id = mt.tag_id
+                        	WHERE ct.user_id = candidate.user_id AND mt.user_id = me.user_id)
+                        AND NOT EXISTS (SELECT 1 FROM dismissals
+                        	WHERE dismissals.user_id = me.user_id AND dismissals.dismissed_user_id = candidate.user_id)
+                        AND NOT EXISTS (SELECT 1 FROM connections c
+                            WHERE (c.requester_id = candidate.user_id AND c.addressee_id = me.user_id)
+                            OR (c.requester_id = me.user_id AND c.addressee_id = candidate.user_id))
+                        ORDER BY ST_Distance(candidate.location, me.location)
+                        LIMIT 300""",
+                MAPPER, id);
     }
 
     public int saveBio(UUID userId, BioInput bioInput) {
