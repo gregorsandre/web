@@ -14,7 +14,7 @@ CREATE TABLE bios (
                       skill_level    integer NOT NULL CHECK (skill_level BETWEEN 1 AND 5),
                       goal           text NOT NULL CHECK (goal IN ('fun','fitness','competition','event_training')),
                       looking_for    text NOT NULL CHECK (looking_for IN ('regular_partner','casual_games')),
-                      env_pref       text NOT NULL CHECK (env_pref IN ('indoor','outdoor','both')),
+                      env_pref       text NOT NULL CHECK (env_pref IN ('indoor','outdoor','indoor_or_outdoor')),
                       age            integer NOT NULL CHECK (age BETWEEN 18 AND 120),
                       age_min        integer NOT NULL CHECK (age_min >= 18),
                       age_max        integer NOT NULL CHECK (age_max <= 120),

@@ -22,7 +22,7 @@ public class ProfileBioService {
 
     private static final Set<String> GOAL = Set.of("fun", "fitness","competition","event_training");
     private static final Set<String> LOOKING_FOR = Set.of("regular_partner", "casual_games");
-    private static final Set<String> ENV_PREF = Set.of("indoor","outdoor","both");
+    private static final Set<String> ENV_PREF = Set.of("indoor","outdoor","indoor_or_outdoor");
     private static final Set<String> AVAILABILITY = Set.of("weekday_morning","weekday_evening","weekend");
 
     public ProfileBioService(ProfileRepository profileRep, BioRepository bioRep, TagRepository tagRep, AccessService accessService) {

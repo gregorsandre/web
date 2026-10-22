@@ -15,7 +15,7 @@ export const LOOKING_FOR_LABELS: Record<LookingFor, string> = {
 export const ENV_PREF_LABELS: Record<EnvPref, string> = {
   indoor: 'Indoor',
   outdoor: 'Outdoor',
-  both: 'Indoor or outdoor',
+  indoor_or_outdoor: 'Indoor or outdoor',
 }
 
 export const AVAILABILITY_LABELS: Record<Availability, string> = {

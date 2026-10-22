@@ -18,7 +18,7 @@ public class DatabaseSeeder implements CommandLineRunner {
 
     private static final String[] GOAL = {"fun", "fitness","competition","event_training"};
     private static final String[] LOOKING_FOR = {"regular_partner", "casual_games"};
-    private static final String[] ENV = {"indoor","outdoor","both"};
+    private static final String[] ENV = {"indoor","outdoor","indoor_or_outdoor"};
     private static final String[] AVAIL = {"weekday_morning","weekday_evening","weekend"};
     private static final double[][] CITIES = {
             {59.437, 24.754}, {59.397, 24.664}, {59.440, 24.870}, {58.378, 26.729}, {58.300, 26.670},

@@ -11,7 +11,7 @@ export type UserSummary = {
 
 export const GOALS = ['fun', 'fitness', 'competition', 'event_training'] as const
 export const LOOKING_FOR = ['regular_partner', 'casual_games'] as const
-export const ENV_PREFS = ['indoor', 'outdoor', 'both'] as const
+export const ENV_PREFS = ['indoor', 'outdoor', 'indoor_or_outdoor'] as const
 export const AVAILABILITY = ['weekday_morning', 'weekday_evening', 'weekend'] as const
 
 export type Goal = (typeof GOALS)[number]

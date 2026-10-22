@@ -62,7 +62,7 @@ public class RecommendationService {
         if (a.goal().equals(b.goal())) {
             score += 1;
         }
-        if (a.envPref().equals(b.envPref())) {
+        if (a.envPref().equals(b.envPref()) || a.envPref().contains(b.envPref()) || b.envPref().contains(a.envPref())) {
             score += 1;
         }
         int commonAvailability = a.availability().stream().filter(b.availability()::contains).toList().size();

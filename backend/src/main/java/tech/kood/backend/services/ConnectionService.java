@@ -57,6 +57,10 @@ public class ConnectionService {
         }
     }
 
+    public void dismissRecommendation(UUID me, UUID dismissed) {
+        repository.dismissUser(me, dismissed);
+    }
+
     public void deleteConnection(UUID userA, UUID userB) {
         int deletion = repository.deleteConnection(userA, userB);
         if (deletion == 0) {
