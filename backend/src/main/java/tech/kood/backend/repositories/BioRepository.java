@@ -57,7 +57,7 @@ public class BioRepository {
                         AND me.age BETWEEN candidate.age_min AND candidate.age_max
                         AND me.looking_for = candidate.looking_for
                         AND ST_DWITHIN (candidate.location, me.location,
-                                        LEAST (candidate.max_radius_km, me.max_radius_km) * 1000)
+                            LEAST (candidate.max_radius_km, me.max_radius_km) * 1000)
                         AND EXISTS (SELECT 1 FROM user_tags ct
                         	JOIN user_tags mt ON ct.tag_id = mt.tag_id
                         	WHERE ct.user_id = candidate.user_id AND mt.user_id = me.user_id)

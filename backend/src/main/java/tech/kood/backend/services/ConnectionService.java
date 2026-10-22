@@ -57,18 +57,10 @@ public class ConnectionService {
         }
     }
 
-//    public void dismissRecommendation(UUID me, UUID dismissed) {
-//        repository.dismissUser(me, dismissed);
-//    }
-
     public void deleteConnection(UUID userA, UUID userB) {
         if (repository.findBetween(userA, userB).isPresent()) {
             repository.deleteConnection(userA, userB);
         }
-//        int deletion = repository.deleteConnection(userA, userB);
-//        if (deletion == 0) {
-//            throw new NotFoundException("No connection between " + userA + " and " + userB);
-//        }
         repository.dismissUser(userA, userB);
     }
 }
