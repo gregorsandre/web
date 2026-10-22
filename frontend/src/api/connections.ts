@@ -10,9 +10,9 @@ export function acceptRequest(id: string): Promise<void> {
   return api<void>(`/connections/${encodeURIComponent(id)}`, { method: 'PUT' })
 }
 
-export function dismissRecommendation(id: string): Promise<void> {
-    return api<void>(`/connections/${encodeURIComponent(id)}`, { method: 'DELETE'})
-}
+//export function dismissRecommendation(id: string): Promise<void> {
+//    return api<void>(`/connections/${encodeURIComponent(id)}`, { method: 'DELETE'})
+//}
 
 // Rejects an incoming request or ends a connection. The backend also dismisses
 // the user, so they are not recommended again.

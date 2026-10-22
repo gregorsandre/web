@@ -39,11 +39,11 @@ public class ConnectionController {
         service.acceptRequest(id, me.id());
     }
 
-    @DeleteMapping("/connections/requests/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    void dismiss(@PathVariable("id") UUID id, @AuthenticationPrincipal User me) {
-        service.dismissRecommendation(me.id(), id);
-    }
+//    @DeleteMapping("/connections/requests/{id}")
+//    @ResponseStatus(HttpStatus.NO_CONTENT)
+//    void dismiss(@PathVariable("id") UUID id, @AuthenticationPrincipal User me) {
+//        service.dismissRecommendation(me.id(), id);
+//    }
 
     @DeleteMapping("/connections/{id}") // disconnect
     @ResponseStatus(HttpStatus.NO_CONTENT)

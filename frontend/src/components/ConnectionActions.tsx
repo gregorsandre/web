@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { ApiError } from '../api/client'
-import { acceptRequest, removeConnection, sendRequest, dismissRecommendation } from '../api/connections'
+import { acceptRequest, removeConnection, sendRequest } from '../api/connections'
 import type { Relationship } from '../connections/relationship'
 
 export type ConnectionOutcome = 'accepted' | 'removed'
@@ -55,7 +55,7 @@ export function ConnectionActions({ userId, relationship, onDone }: Props) {
           disabled={pending}
           onClick={() =>
             run(
-              () => dismissRecommendation(userId),
+              () => removeConnection(userId),
               'removed',
               'Dismiss this recommendation? They will not be recommended to you again.',
             )

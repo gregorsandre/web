@@ -62,7 +62,8 @@ public class BioRepository {
                         	JOIN user_tags mt ON ct.tag_id = mt.tag_id
                         	WHERE ct.user_id = candidate.user_id AND mt.user_id = me.user_id)
                         AND NOT EXISTS (SELECT 1 FROM dismissals
-                        	WHERE dismissals.user_id = me.user_id AND dismissals.dismissed_user_id = candidate.user_id)
+                        	WHERE (dismissals.user_id = me.user_id AND dismissals.dismissed_user_id = candidate.user_id)
+                        	OR (dismissals.user_id = candidate.user_id AND dismissals.dismissed_user_id = me.user_id))
                         AND NOT EXISTS (SELECT 1 FROM connections c
                             WHERE (c.requester_id = candidate.user_id AND c.addressee_id = me.user_id)
                             OR (c.requester_id = me.user_id AND c.addressee_id = candidate.user_id))

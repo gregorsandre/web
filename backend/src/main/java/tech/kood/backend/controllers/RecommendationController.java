@@ -1,8 +1,8 @@
 package tech.kood.backend.controllers;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import tech.kood.backend.auth.User;
 import tech.kood.backend.services.RecommendationService;
 
@@ -21,4 +21,5 @@ public class RecommendationController {
     List<UUID> getRecommendations(@AuthenticationPrincipal User me) {
         return service.getRecommendationIds(me.id());
     }
+
 }
