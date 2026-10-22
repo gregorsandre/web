@@ -40,6 +40,7 @@ export function ConnectionActions({ userId, relationship, onDone }: Props) {
   return (
     <div className="connection-actions">
       {relationship === 'none' && (
+      <>
         <button
           type="button"
           className="button button-primary"
@@ -48,6 +49,21 @@ export function ConnectionActions({ userId, relationship, onDone }: Props) {
         >
           Connect
         </button>
+        <button
+          type="button"
+          className="button"
+          disabled={pending}
+          onClick={() =>
+            run(
+              () => removeConnection(userId),
+              'removed',
+              'Dismiss this recommendation? They will not be recommended to you again.',
+            )
+          }
+        >
+          Reject
+        </button>
+      </>
       )}
       {relationship === 'incoming' && (
         <>
