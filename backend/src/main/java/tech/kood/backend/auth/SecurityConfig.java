@@ -3,6 +3,7 @@ package tech.kood.backend.auth;
 import jakarta.servlet.DispatcherType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -34,6 +35,8 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll()
                         // the socket checks its own token during the handshake (TokenHandshakeInterceptor)
                         .requestMatchers("/ws").permitAll()
+                        // picture links are public; see AvatarController
+                        .requestMatchers(HttpMethod.GET, "/avatars/**").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(e -> e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
