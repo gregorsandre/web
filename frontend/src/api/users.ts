@@ -33,9 +33,11 @@ export type BioInput = {
   availability: Availability[]
 }
 
+// The owner's own bio: everything they entered, plus their sports
 export type Bio = BioInput & {
   userId: string
   updatedAt: string
+  tags: Tag[]
 }
 
 export type BioWithTags = {

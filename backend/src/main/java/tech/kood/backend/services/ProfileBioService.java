@@ -46,15 +46,15 @@ public class ProfileBioService {
         UUID target = accessService.requireViewable(viewerId, rawId);
         return profileRep.findById(target).map(profile -> new About(profile.userId(), profile.aboutMe()));
     }
-    public Optional<Bio> getMyBio(UUID viewerId, String rawId) {
-        UUID target = accessService.requireViewable(viewerId, rawId);
-        return bioRep.findById(target);
-    }
-
-    public Optional<BioWithTags> getBioWithTags(UUID viewerId, String rawId) {
+    public Optional<BioView> getBio(UUID viewerId, String rawId) {
         UUID userId = accessService.requireViewable(viewerId, rawId);
+        List<Tag> tags = tagRep.findByUser(userId);
+        if (userId.equals(viewerId)) {
+            return bioRep.findById(userId).map(bio -> new OwnBio(bio.userId(), bio.skillLevel(), bio.goal(), bio.lookingFor(), bio.envPref(),
+                    bio.age(), bio.ageMin(), bio.ageMax(), bio.lat(), bio.lng(), bio.maxRadiusKm(), bio.availability(), bio.updatedAt(), tags));
+        }
         return bioRep.findById(userId).map(bio -> new BioWithTags(bio.userId(), bio.skillLevel(), bio.goal(), bio.lookingFor(), bio.envPref(),
-                bio.age(), bio.availability(), tagRep.findByUser(userId)));
+                bio.age(), bio.availability(), tags));
     }
 
     public List<Tag> getAllTags() {

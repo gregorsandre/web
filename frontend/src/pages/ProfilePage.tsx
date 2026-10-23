@@ -6,7 +6,6 @@ import { LoadError } from '../components/UserList'
 import { useAsync } from '../hooks/useAsync'
 import { useProfileStatus } from '../profile/ProfileStatusContext'
 import { ProfileForm } from './ProfileForm'
-import { getMyTags } from '../api/tags'
 
 export function ProfilePage() {
   const profileStatus = useProfileStatus()
@@ -14,13 +13,12 @@ export function ProfilePage() {
 
   const state = useAsync('me', async (signal) => {
     // Each part may be missing for a brand-new account
-    const [user, about, bio, tags] = await Promise.all([
+    const [user, about, bio] = await Promise.all([
       nullIfNotFound(getUser('me', signal)),
       nullIfNotFound(getAbout('me', signal)),
       nullIfNotFound(getBio('me', signal)),
-      getMyTags(signal),
     ])
-    return { user, about: about ?? '', bio, tags }
+    return { user, about: about ?? '', bio }
   })
 
   if (state.status === 'loading') {
@@ -30,7 +28,7 @@ export function ProfilePage() {
     return <LoadError onRetry={state.reload} />
   }
 
-  const { user, about, bio, tags } = state.data
+  const { user, about, bio } = state.data
   const name = user?.name ?? ''
 
   function handleSaved() {
@@ -66,7 +64,7 @@ export function ProfilePage() {
         </button>
       </header>
       {about && <p className="about">{about}</p>}
-      <BioDetails bio={bio} showAgeRange tags={tags} />
+      <BioDetails bio={bio} showAgeRange tags={bio.tags} />
     </section>
   )
 }
