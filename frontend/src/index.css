@@ -699,6 +699,30 @@ a {
   overflow-wrap: anywhere;
 }
 
+.avatar-setup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.avatar-editor {
+  display: grid;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.avatar-setup .avatar-editor {
+  margin-bottom: 0;
+}
+
+.avatar-editor-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;

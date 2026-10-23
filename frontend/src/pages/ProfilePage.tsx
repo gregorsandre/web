@@ -6,11 +6,15 @@ import { BioDetails } from '../components/BioDetails'
 import { LoadError } from '../components/UserList'
 import { useAsync } from '../hooks/useAsync'
 import { useProfileStatus } from '../profile/ProfileStatusContext'
+import { AvatarEditor } from '../profile/AvatarEditor'
 import { ProfileForm } from './ProfileForm'
 
 export function ProfilePage() {
   const profileStatus = useProfileStatus()
   const [editing, setEditing] = useState(false)
+  // The picture is saved on its own, so it is tracked here instead of reloading the page
+  // (a reload would throw away whatever is typed into the form)
+  const [avatarOverride, setAvatarOverride] = useState<string | null | undefined>(undefined)
 
   const state = useAsync('me', async (signal) => {
     // Each part may be missing for a brand-new account
@@ -32,6 +36,8 @@ export function ProfilePage() {
 
   const { user, about, bio, account } = state.data
   const name = user?.name ?? ''
+  const avatar = avatarOverride !== undefined ? avatarOverride : (user?.avatar ?? null)
+  const avatarEditor = <AvatarEditor hasPicture={avatar !== null} onChange={setAvatarOverride} />
 
   function handleSaved() {
     setEditing(false)
@@ -45,6 +51,10 @@ export function ProfilePage() {
       <section className="page">
         <h1>{bio ? 'Edit profile' : 'Set up your profile'}</h1>
         {!bio && <p className="notice">Finish your profile to start seeing recommendations.</p>}
+        <div className="avatar-setup">
+          <Avatar src={avatar} name={name} size="large" />
+          {avatarEditor}
+        </div>
         <ProfileForm
           name={name}
           about={about}
@@ -59,7 +69,7 @@ export function ProfilePage() {
   return (
     <section className="page">
       <header className="profile-head">
-        <Avatar src={user?.avatar ?? null} name={name} size="large" />
+        <Avatar src={avatar} name={name} size="large" />
         <div className="profile-head-name">
           <h1>{name || 'Unnamed'}</h1>
           <span className="profile-email" title="Only you can see this">
@@ -70,6 +80,7 @@ export function ProfilePage() {
           Edit
         </button>
       </header>
+      {avatarEditor}
       {about && <p className="about">{about}</p>}
       <BioDetails bio={bio} showAgeRange tags={bio.tags} />
     </section>

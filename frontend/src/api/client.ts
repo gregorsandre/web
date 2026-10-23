@@ -31,8 +31,10 @@ export function setSessionExpiredHandler(handler: () => void): void {
 export async function api<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { method = 'GET', body, auth = true, signal } = options
 
+  const isForm = body instanceof FormData
   const headers: Record<string, string> = {}
-  if (body !== undefined) {
+  // FormData gets its multipart Content-Type, boundary included, from the browser
+  if (body !== undefined && !isForm) {
     headers['Content-Type'] = 'application/json'
   }
   const token = auth ? getToken() : null
@@ -43,7 +45,7 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
   const res = await fetch(BASE_URL + path, {
     method,
     headers,
-    body: body === undefined ? undefined : JSON.stringify(body),
+    body: body === undefined ? undefined : isForm ? body : JSON.stringify(body),
     signal,
   })
 
@@ -59,7 +61,7 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
   if (!text) {
     return undefined as T
   }
-  // /users/{id}/profile answers with a bare string rather than JSON
+  // Some answers, like the 404 text, are plain text rather than JSON
   const contentType = res.headers.get('Content-Type') ?? ''
   return (contentType.includes('application/json') ? JSON.parse(text) : text) as T
 }
