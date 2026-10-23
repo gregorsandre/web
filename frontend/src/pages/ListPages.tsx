@@ -20,14 +20,23 @@ export function RecommendationsPage() {
     // order is kept: strongest match first
     return loadUserCards(ids.filter((id) => !known.has(id)).slice(0, MAX_RECOMMENDATIONS), signal)
   })
+  // Dismissed on this page since the last load; the backend won't recommend them again
+  const [dismissed, setDismissed] = useState<ReadonlySet<string>>(new Set())
+  const visible = mapReady(state, (cards) => cards.filter((card) => !dismissed.has(card.user.id)))
 
   return (
     <section className="page">
       <h1>Discover</h1>
       <UserList
-        state={state}
+        state={visible}
         emptyText="No recommendations right now. Check back later."
-        renderActions={(card) => <ConnectionActions userId={card.user.id} relationship="none" />}
+        renderActions={(card) => (
+          <ConnectionActions
+            userId={card.user.id}
+            relationship="none"
+            onDone={() => setDismissed((ids) => new Set(ids).add(card.user.id))}
+          />
+        )}
       />
     </section>
   )
