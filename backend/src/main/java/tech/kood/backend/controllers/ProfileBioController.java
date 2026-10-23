@@ -27,7 +27,7 @@ public class ProfileBioController {
     }
 
     @GetMapping("/users/{id}/profile")
-    ResponseEntity<String> findProfile(@PathVariable("id") String id, @AuthenticationPrincipal User me) {
+    ResponseEntity<ProfileBioService.About> findProfile(@PathVariable("id") String id, @AuthenticationPrincipal User me) {
         return service.getAbout(me.id(), id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
@@ -42,7 +42,7 @@ public class ProfileBioController {
     }
 
     @GetMapping("/me/profile")
-    ResponseEntity<String> findMyProfile(@AuthenticationPrincipal User me) {
+    ResponseEntity<ProfileBioService.About> findMyProfile(@AuthenticationPrincipal User me) {
         return service.getAbout(me.id(), "me").map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 

@@ -54,12 +54,14 @@ export function getUser(id: string, signal?: AbortSignal): Promise<UserSummary> 
   return api<UserSummary>(userPath(id), { signal })
 }
 
+export type About = {
+  id: string
+  aboutMe: string
+}
+
 export async function getAbout(id: string, signal?: AbortSignal): Promise<string> {
-  // Currently a bare string; accept an object too, since the brief wants every
-  // /users response to carry the id.
-  const raw = await api<string | { aboutMe?: string } | undefined>(`${userPath(id)}/profile`, { signal })
-  if (typeof raw === 'string') return raw
-  return raw?.aboutMe ?? ''
+  const about = await api<About>(`${userPath(id)}/profile`, { signal })
+  return about.aboutMe ?? ''
 }
 
 export function getBio(id: string, signal?: AbortSignal): Promise<Bio> {

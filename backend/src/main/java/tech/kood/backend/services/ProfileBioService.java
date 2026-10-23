@@ -34,15 +34,17 @@ public class ProfileBioService {
 
     public record NameAndPic(UUID id, String name, String avatar) {}
 
+    public record About(UUID id, String aboutMe) {}
+
     public Optional<NameAndPic> getNameAndPic(UUID viewerId, String rawId) {
         UUID target = accessService.requireViewable(viewerId, rawId);
         return profileRep.findById(target).map(profile ->
                 new NameAndPic(profile.userId(), profile.displayName(), profile.avatarPath()));
     }
 
-    public Optional<String> getAbout(UUID viewerId, String rawId) {
+    public Optional<About> getAbout(UUID viewerId, String rawId) {
         UUID target = accessService.requireViewable(viewerId, rawId);
-        return profileRep.findById(target).map(Profile::aboutMe);
+        return profileRep.findById(target).map(profile -> new About(profile.userId(), profile.aboutMe()));
     }
     public Optional<Bio> getMyBio(UUID viewerId, String rawId) {
         UUID target = accessService.requireViewable(viewerId, rawId);
