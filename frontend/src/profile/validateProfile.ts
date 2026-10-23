@@ -1,4 +1,4 @@
-import type { ProfileInput } from '../api/profile'
+import type { ProfileSetupInput } from '../api/profile'
 import type { Availability, BioInput, EnvPref, Goal, LookingFor } from '../api/users'
 
 // Text inputs hold strings, so the form state is kept as typed and only turned
@@ -21,7 +21,7 @@ export type ProfileFormValues = {
 export type ProfileFormErrors = Partial<Record<keyof ProfileFormValues, string>>
 
 export type ValidationResult =
-  | { ok: true; profile: ProfileInput; bio: BioInput }
+  | { ok: true; profile: Pick<ProfileSetupInput, 'displayName' | 'aboutMe'>; bio: BioInput }
   | { ok: false; errors: ProfileFormErrors }
 
 // Limits mirror the CHECK constraints in V3__profiles_bios.sql

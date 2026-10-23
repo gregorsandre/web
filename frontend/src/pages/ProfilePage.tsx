@@ -49,7 +49,6 @@ export function ProfilePage() {
           name={name}
           about={about}
           bio={bio}
-          tags={tags}
           onSaved={handleSaved}
           onCancel={bio ? () => setEditing(false) : undefined}
         />
