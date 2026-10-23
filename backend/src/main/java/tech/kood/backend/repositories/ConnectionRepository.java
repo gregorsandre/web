@@ -81,6 +81,7 @@ public class ConnectionRepository {
     public void dismissUser(UUID me, UUID dismissed) {
         jdbc.update("""
                 INSERT INTO dismissals (user_id, dismissed_user_id)
-                VALUES (?, ?)""", me, dismissed);
+                VALUES (?, ?)
+                ON CONFLICT DO NOTHING""", me, dismissed);
     }
 }
