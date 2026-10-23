@@ -56,7 +56,7 @@ public class ChatController {
 
     @PostMapping("/{id}/read")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void read(@AuthenticationPrincipal UUID me, @PathVariable("id") long id) {
-        service.markRead(me, id);
+    void read(@AuthenticationPrincipal User me, @PathVariable("id") long id) {
+        service.markRead(me.id(), id);
     }
 }
