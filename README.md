@@ -1,63 +1,80 @@
-Just notes for now:
+# Sports Buddies
 
-## Starting up the database and creating test users:
-Make sure the docker engine is running then use following commands
+A web app that finds you sports partners. You fill in a profile with your sports, skill level, goals, availability and location. The app recommends people nearby who fit, and once you connect you can chat in real time.
 
+Built with a Java Spring Boot backend, a React + TypeScript frontend and PostgreSQL (with PostGIS for distances).
 
-Windows
+## Setup
+
+You need Docker, Java 21 and Node.js 20.19 or newer.
+
 ```
-docker compose up -d
+docker compose up -d                       # PostgreSQL + PostGIS on port 5432
 cd backend
-.\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=reset"        # clears the database
-.\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=reset,seed"   # clears the database and creates 120 test users
-.\mvnw.cmd spring-boot:run                                           # for normal testing of register and login
+./mvnw spring-boot:run                     # backend on http://localhost:8080
 ```
 
-For MacOs and Linux replace `.\mvnw.cmd` with `./mnvw`
+In a second terminal:
 
-The default database size is 120 users, which is still a rather small number of users. In order to change the number of users generated, use the following command and replace 500 with the number of users desired (digits only, no spaces):
-```
-.\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=reset,seed" "-Dspring-boot.run.jvmArguments=-Dseed.count=500"
-```
-to wipe the database completely:
-```
-docker compose down -v
-```
-
-Checks to see if database seeder worked properly. Run these in the terminal.
-1. Open psql
-```
-docker compose exec db psql -U sportsbuddies -d sportsbuddies
-```
-2. Turn off the pager, so the output stays on screen:
-```
-\pset pager off
-```
-3. Run each query on its own, ending with the semicolon:
-```
-SELECT count(*) FROM users;
-```
-What you should see after `reset,seed`
-
-- users: 120, the seeder’s default
-
-What a wrong result means
-
-- users is 0: the seed profile didn’t run. Check that the start command had `reset,seed` and read the backend terminal for an error.
-- The backend stopped with “No sports in the tags table”: the same cause as above.
-- A duplicate email error: the seed ran twice on the same database. Run it together with `reset`.
-
-Type `\q` to leave psql when you’re done.
-
-
-
-starting up the frontend (needs the backend running on port 8080):
 ```
 cd frontend
 npm install
-npm run dev        # http://localhost:5173, API calls are proxied to the backend under /api
+npm run dev                                # app on http://localhost:5173
 ```
 
+On Windows use `.\mvnw.cmd` instead of `./mvnw`. The frontend sends API calls to the backend through `/api`.
+
+### Test data
+
+Start the backend once with a profile to reset or fill the database, then stop it (Ctrl+C) and start it again normally. While a `reset` profile is running, every restart wipes the database again.
+
+```
+./mvnw spring-boot:run "-Dspring-boot.run.profiles=reset,seed"    # empty the database and create 120 users
+./mvnw spring-boot:run "-Dspring-boot.run.profiles=reset"         # only empty the database
+./mvnw spring-boot:run "-Dspring-boot.run.profiles=reset,seed" "-Dspring-boot.run.jvmArguments=-Dseed.count=500"   # more users
+```
+
+Seeded users are `user1@example.com` to `user120@example.com`, all with the password `password123`. To check the result: `docker compose exec db psql -U sportsbuddies -d sportsbuddies -c "SELECT count(*) FROM users;"`. To remove the database completely: `docker compose down -v`.
+
+### Configuration
+
+Login tokens are signed with `JWT_SECRET`. The built-in default is only for local development; set your own secret (at least 32 characters) anywhere else:
+
+```
+JWT_SECRET=your-long-random-secret ./mvnw spring-boot:run
+```
+
+## Usage
+
+1. **Register** with an email and a password, then fill in your profile. Your location comes from the browser, so allow location access when asked.
+2. **Discover** shows up to 10 recommended people, best match first. Press **Connect** to send a request or **Reject** to never see them again.
+3. **Connections** lists incoming requests (Accept or Reject) and the people you are connected with. Open a profile to **Disconnect**.
+4. **Message** on a connected person's profile opens your chat. **Chats** lists every chat, most recent first, with a dot in the menu when something is unread.
+5. **Profile** shows your own details and email. Use **Edit** to change them, and **Add picture**, **Change picture** or **Remove** for your photo.
+6. **Log out** is in the header on every page.
+
+Profiles are only visible to people who are recommended to you, have a pending request with you, or are connected with you. Everyone else gets a 404, the same as for a user that doesn't exist.
+
+## API
+
+| Endpoint | Returns |
+|---|---|
+| `GET /users/{id}` | `id`, `name`, `avatar` (picture link) |
+| `GET /users/{id}/profile` | `id`, `aboutMe` |
+| `GET /users/{id}/bio` | biographical data used for matching |
+| `GET /me`, `/me/profile`, `/me/bio` | the same for yourself (your bio also includes location, age range and distance) |
+| `GET /recommendations` | up to 10 user ids |
+| `GET /connections` | ids of connected users |
+
+All requests need `Authorization: Bearer <token>` from `POST /auth/register` or `POST /auth/login`. Real-time chat events use a WebSocket at `/ws`.
+
+## Extra features
+
+- Online/offline status on profiles, in the chat and in the chat list
+- "… is typing" indicator in chats
+- Proximity filtering with real distances (PostGIS), using the smaller of the two people's maximum distances
+- Unread message count per chat
+- Pictures are cropped and resized in the browser before upload
 
 ## Recommendation algorithm
 
@@ -117,6 +134,9 @@ At most **10** recommendations are returned at a time. The endpoint returns only
 
 ### Demonstrating it
 
-The seed data creates 120 users spread over several Estonian regions, with random profiles. To see the rules at work:
+The seed data creates 120 users with random profiles spread over several Estonian regions. Log in as `user20@example.com` or `user92@example.com` (password `password123`) and open Discover to see ranked recommendations. Many seeded users get few or none, because the hard rules leave out anyone who does not fit.
 
-- Log in as any seeded user (for example `user1@example.com`, password `password123`) and open Discover.
+To see the rules on their own, register two new users in the same place:
+
+- **Good match:** same sports, similar age inside each other's age range, both looking for the same thing. They are recommended to each other.
+- **Poor match:** no shared sport, or ages outside each other's range, or one wants a regular partner and the other casual games. Neither sees the other.
