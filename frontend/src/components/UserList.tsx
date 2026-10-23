@@ -30,7 +30,7 @@ export function UserList({ state, emptyText, renderActions }: Props) {
             <Avatar src={card.user.avatar} name={card.user.name} />
             <span className="user-card-body">
               <strong>{card.user.name || 'Unnamed'}</strong>
-              {card.bio && <BioTags bio={card.bio} />}
+              {card.bio && <BioTags bio={card.bio} sports={card.bio.tags} />}
             </span>
           </Link>
           {renderActions && <div className="user-card-actions">{renderActions(card)}</div>}

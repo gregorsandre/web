@@ -49,13 +49,18 @@ return (
   )
 }
 
-export function BioTags({ bio }: { bio: BioFields }) {
+export function BioTags({ bio, sports = [] }: { bio: BioFields; sports?: Tag[] }) {
   return (
     <ul className="tags">
       <li>{bio.age} y</li>
       <li>{skillLabel(bio.skillLevel)}</li>
       <li>{GOAL_LABELS[bio.goal]}</li>
       <li>{ENV_PREF_LABELS[bio.envPref]}</li>
+      {sports.map((sport) => (
+        <li key={sport.id} className="tag-sport">
+          {sport.name}
+        </li>
+      ))}
     </ul>
   )
 }
