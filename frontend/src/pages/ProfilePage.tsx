@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { getAccount } from '../api/account'
 import { getAbout, getBio, getUser, nullIfNotFound } from '../api/users'
 import { Avatar } from '../components/Avatar'
 import { BioDetails } from '../components/BioDetails'
@@ -13,12 +14,13 @@ export function ProfilePage() {
 
   const state = useAsync('me', async (signal) => {
     // Each part may be missing for a brand-new account
-    const [user, about, bio] = await Promise.all([
+    const [user, about, bio, account] = await Promise.all([
       nullIfNotFound(getUser('me', signal)),
       nullIfNotFound(getAbout('me', signal)),
       nullIfNotFound(getBio('me', signal)),
+      getAccount(signal),
     ])
-    return { user, about: about ?? '', bio }
+    return { user, about: about ?? '', bio, account }
   })
 
   if (state.status === 'loading') {
@@ -28,7 +30,7 @@ export function ProfilePage() {
     return <LoadError onRetry={state.reload} />
   }
 
-  const { user, about, bio } = state.data
+  const { user, about, bio, account } = state.data
   const name = user?.name ?? ''
 
   function handleSaved() {
@@ -58,7 +60,12 @@ export function ProfilePage() {
     <section className="page">
       <header className="profile-head">
         <Avatar src={user?.avatar ?? null} name={name} size="large" />
-        <h1>{name || 'Unnamed'}</h1>
+        <div className="profile-head-name">
+          <h1>{name || 'Unnamed'}</h1>
+          <span className="profile-email" title="Only you can see this">
+            {account.email}
+          </span>
+        </div>
         <button type="button" className="button" onClick={() => setEditing(true)}>
           Edit
         </button>

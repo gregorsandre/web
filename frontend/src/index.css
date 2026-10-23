@@ -340,6 +340,12 @@ a {
   color: var(--text-muted);
 }
 
+/* the shared interest is what a match hinges on, so sports stand out */
+.tags li.tag-sport {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
 .profile-head {
   display: flex;
   align-items: center;
@@ -685,6 +691,12 @@ a {
 .profile-head-name {
   flex: 1;
   min-width: 0;
+}
+
+.profile-email {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
 }
 
 .visually-hidden {
