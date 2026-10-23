@@ -92,7 +92,7 @@ The query returns the nearest 300 candidates. Distance is calculated in the data
 | Skill level | Within one level | +1 |
 | Skill level | Exactly the same level | +1 more |
 | Goal | Same goal | +1 |
-| Environment | Same indoor/outdoor preference | +1 |
+| Environment | Same indoor/outdoor preference, or either of them is happy with both ("indoor or outdoor") | +1 |
 | Availability | At least one shared time slot | +1 |
 | Availability | Two or more shared time slots | +1 more |
 
